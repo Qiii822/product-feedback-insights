@@ -14,6 +14,21 @@ def test_agglomerative_groups_identical_and_flags_singleton():
     assert labels[2] == -1
 
 
+def test_agglomerative_forbids_cross_category_merge():
+    # 两条向量完全相同，但 category 不同 → 永不合并
+    labels = agglomerative_cluster(
+        [[1.0, 0.0], [1.0, 0.0]], 0.9, categories=["payment_failed", "checkout_stuck"]
+    )
+    assert labels == [-1, -1]
+
+
+def test_agglomerative_allows_same_category_merge():
+    labels = agglomerative_cluster(
+        [[1.0, 0.0], [1.0, 0.0]], 0.9, categories=["payment_failed", "payment_failed"]
+    )
+    assert labels[0] == labels[1] and labels[0] != -1
+
+
 class _StubEmbedder:
     """确定性 stub：相同文本 → 相同向量，不同文本 → 正交。"""
 

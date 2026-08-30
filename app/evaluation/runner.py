@@ -86,7 +86,8 @@ def run_classification(llm=None, model: str = "fake") -> dict:
     }
 
 
-def run_clustering() -> dict:
+def run_clustering(llm=None, model: str = "fake") -> dict:
+    llm = llm or FakeLLM()
     cases = case_loader.load_clustering_cases()
     embedder = FastembedEmbeddingProvider()
     texts = [c["raw_text"] for c in cases]
@@ -94,22 +95,44 @@ def run_clustering() -> dict:
     true_labels = [c["problem_id"] for c in cases]
     idx = {c["id"]: i for i, c in enumerate(cases)}
 
-    thresholds = {}
-    failure_merged = {}
-    for t in CLUSTER_THRESHOLDS:
-        labels = agglomerative_cluster(embeddings, t)
+    # 用 analyzer 得到每条的真实分类（与生产 pipeline 一致）
+    analyzer = LLMFeedbackAnalyzer(llm, model=model, prompt_version="v1")
+    categories = []
+    for c in cases:
+        item = FeedbackItem(feedback_id=c["id"], raw_text=c["raw_text"])
+        categories.append(analyzer.analyze(item).primary_category.value)
+
+    def _measure(labels):
         pred = [f"c{lab}" if lab >= 0 else f"o{i}" for i, lab in enumerate(labels)]
         p, r, f1 = pairwise_prf(true_labels, pred)
-        thresholds[t] = {
+        return {
             "pairwise_precision": round(p, 4),
             "pairwise_recall": round(r, 4),
             "pairwise_f1": round(f1, 4),
             "ari": round(adjusted_rand_index(true_labels, pred), 4),
         }
-        lab_frozen, lab_failed = labels[idx["k006"]], labels[idx["k001"]]
-        failure_merged[t] = bool(lab_frozen != -1 and lab_frozen == lab_failed)
 
-    return {"n": len(cases), "thresholds": thresholds, "failure_merged": failure_merged}
+    def _failure(labels):
+        lab_frozen, lab_failed = labels[idx["k006"]], labels[idx["k001"]]
+        return bool(lab_frozen != -1 and lab_frozen == lab_failed)
+
+    embedding_only = {}
+    category_aware = {}
+    failure = {"embedding_only": {}, "category_aware": {}}
+    for t in CLUSTER_THRESHOLDS:
+        labels_eo = agglomerative_cluster(embeddings, t)
+        labels_ca = agglomerative_cluster(embeddings, t, categories=categories)
+        embedding_only[t] = _measure(labels_eo)
+        category_aware[t] = _measure(labels_ca)
+        failure["embedding_only"][t] = _failure(labels_eo)
+        failure["category_aware"][t] = _failure(labels_ca)
+
+    return {
+        "n": len(cases),
+        "embedding_only": embedding_only,
+        "category_aware": category_aware,
+        "failure_merged": failure,
+    }
 
 
 def run_prioritisation() -> dict:

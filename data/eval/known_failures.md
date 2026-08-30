@@ -11,3 +11,4 @@
 - **记录日期**：2026-08-30
 - **后续动作**：Phase 7 引入 category-aware 聚类（semantic similarity + primary_category compatibility），并将本案例加入评估集验证。
 - **当前阈值状态**：0.75 是 initial heuristic，**不是** validated production threshold，将在 Phase 7 用标注评估集校准。
+- **解决状态（2026-08-30）**：✅ 已通过 category-aware clustering 修复——不同 primary_category 永不合并。评估验证：该 case 在所有阈值下都不再误并入 payment_failed（见 ADR-021）。

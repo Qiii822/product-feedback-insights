@@ -1,22 +1,22 @@
 """问题聚类（clustering）：反馈 + 分析 → 候选产品问题。
 
-算法（Phase 4）：
+算法（V2）：
 真实 embedding → 余弦相似度 → 凝聚聚类（complete linkage，precision-over-recall）
+→ category-aware 约束（不同 primary_category 永不合并）
 → 区分 confirmed（多成员簇）/ candidate（单成员簇）→ LLM 命名（evidence-grounded）
 → 组装 ProductProblem + Evidence。
 
 关键决策：
 - complete linkage = 仅当两簇间所有对的相似度都 ≥ 阈值才合并，最保守。
+- category-aware：不同 primary_category 的反馈永不合并（taxonomy 是"同一问题"的权威定义）。
 - 单成员簇不再被静默丢弃，而是作为 candidate problem（needs_review=True）保留。
 - cohesion_score 是确定性计算的簇内语义一致度（平均到质心相似度）。
 - confidence 是 provisional 占位（未校准，不用于产品决策）。
 - affected_segments 从 FeedbackItem.platform 元数据聚合，不是 LLM 推断。
 
-已知限制（Phase 4 review）：
-- 当前聚类只依赖 embedding 相似度，未考虑 primary_category compatibility。
-  已知失败案例："Payment page froze."（checkout_stuck）被并入 payment_failed 簇
-  （cosine ≥ 0.75）。已记录到 data/eval/known_failures.md，Phase 7 引入
-  category-aware 聚类（semantic similarity + primary_category compatibility）并加入评估集。
+已知限制：
+- category-aware 会把 classification error 锁进错误的组（缓解：94% 分类准确率 +
+  needs_review 标记）。见 docs/decisions/decision-log.md。
 """
 
 from collections import Counter
@@ -49,8 +49,13 @@ def cosine_similarity_matrix(embeddings: list[list[float]]) -> np.ndarray:
     return M @ M.T
 
 
-def agglomerative_cluster(embeddings: list[list[float]], threshold: float) -> list[int]:
+def agglomerative_cluster(
+    embeddings: list[list[float]], threshold: float, categories: list | None = None
+) -> list[int]:
     """凝聚聚类（complete linkage）。
+
+    categories（可选）：category-aware 约束——不同 category 的条目永不合并
+    （跨类相似度被设为 -1，低于任何阈值）。
 
     返回 labels：每个 item 的簇 id（从 0 起），-1 表示单成员（未与其他条目达到阈值）。
     """
@@ -61,6 +66,9 @@ def agglomerative_cluster(embeddings: list[list[float]], threshold: float) -> li
         return [-1]
 
     sim = cosine_similarity_matrix(embeddings)
+    if categories is not None:
+        cat = np.asarray(categories)
+        sim[cat[:, None] != cat[None, :]] = -1.0
     clusters = [{i} for i in range(n)]
 
     while len(clusters) > 1:
@@ -122,7 +130,8 @@ class EmbeddingClusteringService(ClusteringService):
 
         texts = [item.raw_text for item, _ in to_cluster]
         embeddings = self._embedder.embed(texts)
-        labels = agglomerative_cluster(embeddings, self._threshold)
+        categories = [a.primary_category.value for _, a in to_cluster]
+        labels = agglomerative_cluster(embeddings, self._threshold, categories=categories)
 
         # 分组：多成员簇（confirmed）vs 单成员（candidate）
         cluster_groups: dict[int, list] = {}

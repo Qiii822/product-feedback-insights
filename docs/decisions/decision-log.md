@@ -209,3 +209,24 @@
 | system_order | p1,p3,p2,… | **p1,p2,p3,p4,p5,p6**（= human_order） |
 
 关键变化：critical/8 条（重复扣费）现在排在 high/15 条（Apple Pay）之上，符合 PM 判断。
+
+---
+
+## ADR-021：Category-Aware Clustering（禁止跨 category 合并）
+
+- **决策**：聚类加入 category-aware 硬约束——不同 `primary_category` 的反馈**永不合并**（跨类相似度设为 -1）。等价于"按 category 分组，组内再做 embedding 聚类"。
+- **备选方案**：跨类加 penalty（软约束）；跨类要求更高阈值；完全靠 embedding（现状）。
+- **权衡**：禁止最可解释、最符合 taxonomy 语义、零新超参；代价是 classification error 会被锁进错误组（缓解：94% 分类准确率 + needs_review 标记）。
+- **为什么**：taxonomy 是"什么算同一问题"的权威定义，两个不同 category 的反馈本就不该合并；已确认的 failure case 正是跨类误合并导致。
+
+**评估验证（阈值 0.75，DeepSeek 真实分类）：**
+
+| 指标 | embedding-only（旧） | category-aware（新） |
+|------|---------------------|---------------------|
+| pairwise precision | 0.412 | **1.000** |
+| pairwise recall | 0.700 | 0.700 |
+| pairwise F1 | 0.518 | **0.824** |
+| ARI | 0.475 | **0.814** |
+| failure（Payment page froze 误并入 payment_failed） | ✅ 复现 | ❌ 全阈值消除 |
+
+结论：failure case 消除，precision 0.412→1.0，recall 持平，最优 F1 从 0.85 档（0.667）移到 0.70 档（0.824）。
