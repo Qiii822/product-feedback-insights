@@ -1,4 +1,4 @@
-# AI Product Feedback Agent
+# Product Feedback Insights
 
 将大量非结构化的客户反馈，转化为**有证据支撑的产品洞察**的产品分析工具。
 
@@ -39,7 +39,7 @@
 ## 目录结构
 
 ```
-ai-feedback-agent/
+product-feedback-insights/
 ├── app/
 │   ├── api/            # HTTP 层（路由）
 │   ├── core/           # 配置、日志、追踪

@@ -1,7 +1,7 @@
 [project]
-name = "ai-feedback-agent"
+name = "product-feedback-insights"
 version = "0.1.0"
-description = "AI Product Feedback Agent — 将非结构化客户反馈转化为有证据支撑的产品洞察。"
+description = "Product Feedback Insights — 将非结构化客户反馈转化为有证据支撑的产品洞察。"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

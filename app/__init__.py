@@ -1,1 +1,1 @@
-"""AI Product Feedback Agent 应用包。"""
+"""Product Feedback Insights 应用包。"""

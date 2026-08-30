@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     )
 
     # 应用
-    app_name: str = "AI Product Feedback Agent"
+    app_name: str = "Product Feedback Insights"
     environment: str = "development"
     log_level: str = "INFO"
 
