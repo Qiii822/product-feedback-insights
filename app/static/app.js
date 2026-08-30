@@ -32,7 +32,7 @@ async function handleIngest() {
   try {
     const content = await file.text();
     const result = await postJSON("/api/ingest", { filename: file.name, content });
-    setStatus(`摄取完成：${result.added} 新增 / ${result.skipped_duplicates} 去重 / ${result.invalid} 无效`);
+    setStatus(`已重置并摄取 ${result.added} 条反馈${result.invalid ? `（${result.invalid} 条无效）` : ""}`);
     await loadFeedback();
   } catch (e) {
     setStatus("摄取失败：" + e.message, true);

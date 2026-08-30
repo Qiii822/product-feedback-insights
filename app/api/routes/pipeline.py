@@ -31,8 +31,10 @@ def ingest(req: IngestRequest):
         tmp.write(req.content)
         path = tmp.name
     try:
-        service = IngestionService(SQLFeedbackRepository(SessionLocal))
-        return service.ingest_file(path)
+        item_repo = SQLFeedbackRepository(SessionLocal)
+        SQLProblemRepository(SessionLocal).clear()  # 清旧问题 / 证据 / 机会
+        item_repo.clear()  # 清旧反馈，保证上传的文件是唯一数据源
+        return IngestionService(item_repo).ingest_file(path)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=f"摄取失败：{exc}") from exc
     finally:
