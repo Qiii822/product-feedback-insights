@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Product Feedback Agent</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1>AI Product Feedback Agent</h1>
+      <p class="subtitle">将非结构化客户反馈转化为有证据支撑的产品洞察</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="toolbar">
+      <div class="upload">
+        <label class="file-label" for="fileInput">选择反馈文件（CSV / JSON）</label>
+        <input type="file" id="fileInput" accept=".csv,.json">
+        <button id="ingestBtn" class="btn">上传摄取</button>
+      </div>
+      <button id="runBtn" class="btn btn-primary">运行完整分析</button>
+      <span id="status" class="status"></span>
+    </section>
+
+    <section id="summary" class="summary" hidden></section>
+
+    <section id="opportunity" class="opportunity" hidden></section>
+
+    <section id="problems" class="section" hidden>
+      <h2>已确认的产品问题（按优先级排序）</h2>
+      <div id="problemList" class="cards"></div>
+    </section>
+
+    <section id="candidates" class="section" hidden>
+      <h2>候选问题（需人工复核）</h2>
+      <div id="candidateList" class="cards"></div>
+    </section>
+
+    <section id="feedback" class="section" hidden>
+      <h2>反馈明细</h2>
+      <div id="feedbackList" class="feedback-list"></div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

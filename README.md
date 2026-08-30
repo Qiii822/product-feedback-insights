@@ -4,7 +4,7 @@
 
 这是一个面向 AI 产品经理（AI PM）的作品集项目。它不仅是"能跑通"，更重要的是展示一套**清晰、可替换、可评估**的 AI 系统架构，以及背后的产品与技术决策。
 
-> 当前状态：**完整 pipeline 已接入真实 DeepSeek 并端到端跑通**。反馈摄取 → 分析 → 聚类 → 排序 → 建议全链路可运行，含评估框架（evaluation framework）与 76 个单元测试。UI（Phase 8）尚未实现。
+> 当前状态：**完整 pipeline 已接入真实 DeepSeek 并端到端跑通**，并提供**浏览器 UI（dashboard）**。反馈摄取 → 分析 → 聚类 → 排序 → 建议全链路可运行，含评估框架（evaluation framework）与 78 个单元测试。
 
 ---
 
@@ -47,7 +47,8 @@ ai-feedback-agent/
 │   ├── models/         # ORM 模型
 │   ├── schemas/        # Pydantic 数据契约（5 个核心 schema）
 │   ├── services/       # 业务接口 + LLM 客户端实现
-│   └── repositories/   # 存储实现
+│   ├── repositories/   # 存储实现
+│   └── static/         # 浏览器 UI（HTML / JS / CSS）
 ├── alembic/            # 数据库迁移
 ├── tests/              # 单元测试
 ├── data/               # raw / processed / eval（数据文件，gitignore）
@@ -88,12 +89,16 @@ uv run pytest
 
 > `.env` 已被 `.gitignore` 忽略，API key 不会进入版本控制。
 
-启动 API（默认 http://127.0.0.1:8000，目前仅有 `/health`）：
+## 浏览器 UI
+
+启动服务后，在浏览器打开 **http://127.0.0.1:8000** 即可看到 dashboard：
 
 ```bash
 uv run uvicorn app.main:app --reload
-curl http://127.0.0.1:8000/health   # → {"status":"ok"}
+# 打开 http://127.0.0.1:8000
 ```
+
+UI 支持：上传 CSV/JSON → 摄取 → 一键运行完整分析 → 查看排序后的产品问题、候选问题、证据与 Top 机会建议。
 
 ---
 
@@ -134,5 +139,5 @@ curl http://127.0.0.1:8000/health   # → {"status":"ok"}
 | Phase 5 | 优先级排序 + 机会生成 | ✅ 完成 |
 | Phase 6 | 仅在确有必要处引入 Agentic 行为 | ⏸️ 评估显示暂无必要 |
 | Phase 7 | 评估套件 | ✅ 完成 |
-| Phase 8 | UI | 待开始 |
+| Phase 8 | UI | ✅ 完成 |
 | Phase 9 | 可靠性 / 可观测性 / UX | 待开始 |

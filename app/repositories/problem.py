@@ -3,7 +3,7 @@
 决策：Phase 4/5 提供具体的 SQL 实现（不抽象接口），当前只有一套存储。
 """
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from app.models.evidence import EvidenceModel
 from app.models.opportunity import ProductOpportunityModel
@@ -119,4 +119,12 @@ class SQLProblemRepository:
     def save_opportunity(self, opportunity: ProductOpportunity) -> None:
         with self._session_factory() as session:
             session.add(_opportunity_to_model(opportunity))
+            session.commit()
+
+    def clear(self) -> None:
+        """清空问题 / 证据 / 机会（重跑 pipeline 前用，避免重复累积）。"""
+        with self._session_factory() as session:
+            session.execute(delete(ProductOpportunityModel))
+            session.execute(delete(EvidenceModel))
+            session.execute(delete(ProductProblemModel))
             session.commit()
