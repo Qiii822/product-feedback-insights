@@ -7,6 +7,7 @@ embedding 已拆分为独立的 EmbeddingProvider（见 embedding.py）。
 """
 
 import json
+import time
 
 from app.core.errors import LLMOutputError, LLMProviderError
 from app.schemas.analysis import FeedbackAnalysis
@@ -74,10 +75,15 @@ class DeepSeekProvider(LLMClient):
         self._client = OpenAI(api_key=api_key, base_url=base_url)
         self._model = model
         self._temperature = temperature
+        # 可观测性：累计本次会话的 token / 延迟 / 调用次数
+        self.total_tokens = 0
+        self.total_calls = 0
+        self.total_latency_ms = 0.0
 
     def complete(self, messages, output_schema):
         from pydantic import ValidationError
 
+        started = time.perf_counter()
         try:
             resp = self._client.chat.completions.create(
                 model=self._model,
@@ -87,6 +93,12 @@ class DeepSeekProvider(LLMClient):
             )
         except Exception as exc:
             raise LLMProviderError(f"DeepSeek API 调用失败：{exc}") from exc
+
+        self.total_latency_ms += (time.perf_counter() - started) * 1000
+        self.total_calls += 1
+        usage = getattr(resp, "usage", None)
+        if usage is not None:
+            self.total_tokens += int(getattr(usage, "total_tokens", 0) or 0)
 
         content = (resp.choices[0].message.content or "").strip()
         try:

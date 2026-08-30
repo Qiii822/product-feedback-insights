@@ -1,5 +1,9 @@
 """完整 pipeline 编排（供 API / UI 调用）：分析 → 聚类 → 排序 → 建议 → 持久化。"""
 
+import logging
+import time
+import uuid
+
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.repositories.problem import SQLProblemRepository
@@ -11,23 +15,43 @@ from app.services.llm import get_llm
 from app.services.opportunity import LLMOpportunityGenerator
 from app.services.prioritisation import WeightedPrioritisationService
 
+logger = logging.getLogger("pipeline")
+
+
+def _with_run(response: dict, run_id: str, started: float, llm, model: str) -> dict:
+    """给响应附上 run 元数据（run_id / 延迟 / token / model）。"""
+    response["run"] = {
+        "run_id": run_id,
+        "latency_ms": round((time.perf_counter() - started) * 1000, 1),
+        "total_tokens": getattr(llm, "total_tokens", 0),
+        "total_calls": getattr(llm, "total_calls", 0),
+        "model": model,
+    }
+    return response
+
 
 def run_pipeline() -> dict:
-    """运行完整 pipeline，返回可直接渲染的结果 dict。"""
+    """运行完整 pipeline，返回可直接渲染的结果 dict（含 run 元数据）。"""
+    run_id = uuid.uuid4().hex
+    started = time.perf_counter()
+
     item_repo = SQLFeedbackRepository(SessionLocal)
     problem_repo = SQLProblemRepository(SessionLocal)
     items = item_repo.list()
-    if not items:
-        return {
-            "feedback_count": 0,
-            "problems": [],
-            "candidates": [],
-            "opportunity": None,
-            "other": {"count": 0, "percentage": 0.0, "samples": []},
-        }
-
     llm = get_llm()
     model = settings.deepseek_model if settings.deepseek_api_key else "fake"
+
+    if not items:
+        return _with_run(
+            {
+                "feedback_count": 0,
+                "problems": [],
+                "candidates": [],
+                "opportunity": None,
+                "other": {"count": 0, "percentage": 0.0, "samples": []},
+            },
+            run_id, started, llm, model,
+        )
 
     # 1. 分析
     analyzer = LLMFeedbackAnalyzer(llm, model=model, prompt_version="v1")
@@ -77,7 +101,7 @@ def run_pipeline() -> dict:
             "evidence": [texts[m] for m in members if m in texts],
         }
 
-    return {
+    response = {
         "feedback_count": len(items),
         "problems": [_problem_dict(p, i) for i, p in enumerate(ranked, start=1)],
         "candidates": [_problem_dict(p) for p in result.problems if p.needs_review],
@@ -98,3 +122,9 @@ def run_pipeline() -> dict:
             "samples": result.other_samples,
         },
     }
+    logger.info(
+        "run %s: %d feedback -> %d problems / %d candidates, %.0fms, %d tokens",
+        run_id, len(items), len(ranked), len(result.problems) - len(ranked),
+        (time.perf_counter() - started) * 1000, getattr(llm, "total_tokens", 0),
+    )
+    return _with_run(response, run_id, started, llm, model)

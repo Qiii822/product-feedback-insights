@@ -4,7 +4,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.db.session import SessionLocal
@@ -24,12 +24,16 @@ class IngestRequest(BaseModel):
 def ingest(req: IngestRequest):
     """摄取 CSV/JSON 内容（前端读取文件后把内容作为文本发来）。"""
     suffix = Path(req.filename).suffix.lower()
+    if suffix not in (".csv", ".json"):
+        raise HTTPException(status_code=400, detail=f"不支持的文件类型：{suffix}")
     with tempfile.NamedTemporaryFile(mode="w", suffix=suffix, delete=False, encoding="utf-8") as tmp:
         tmp.write(req.content)
         path = tmp.name
     try:
         service = IngestionService(SQLFeedbackRepository(SessionLocal))
         return service.ingest_file(path)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"摄取失败：{exc}") from exc
     finally:
         os.unlink(path)
 
@@ -53,4 +57,7 @@ def feedback():
 @router.post("/run")
 def run():
     """运行完整 pipeline，返回可渲染的结果。"""
-    return run_pipeline()
+    try:
+        return run_pipeline()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"分析失败：{exc}") from exc

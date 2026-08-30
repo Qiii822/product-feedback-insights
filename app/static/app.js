@@ -53,12 +53,6 @@ async function handleRun() {
 async function loadFeedback() {
   try {
     const items = await (await fetch("/api/feedback")).json();
-    const section = $("#feedback");
-    if (!items.length) {
-      section.hidden = true;
-      return;
-    }
-    section.hidden = false;
     $("#feedbackList").innerHTML = items
       .map(
         (i) =>
@@ -88,9 +82,12 @@ function renderSummary(data) {
   ];
   const el = $("#summary");
   el.hidden = false;
+  const run = data.run
+    ? `<div class="run-info">run ${data.run.run_id.slice(0, 8)} · ${data.run.latency_ms}ms · ${data.run.total_tokens} tokens · ${data.run.model}</div>`
+    : "";
   el.innerHTML = cards
     .map((c) => `<div class="stat"><div class="stat-value">${c.value}</div><div class="stat-label">${c.label}</div></div>`)
-    .join("");
+    .join("") + run;
 }
 
 function renderOpportunity(opp) {
