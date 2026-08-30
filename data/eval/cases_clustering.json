@@ -1,0 +1,31 @@
+{
+  "version": "v1",
+  "dimension": "clustering",
+  "note": "手标 same-problem 关系（problem_id）。重点：c_k006 'Payment page froze.' 属于 checkout_stuck，不应与 payment_failed 合并（regression case）。",
+  "cases": [
+    {"id": "k001", "raw_text": "Payment failed again.", "problem_id": "payment_failed"},
+    {"id": "k002", "raw_text": "Payment failed.", "problem_id": "payment_failed"},
+    {"id": "k003", "raw_text": "Got an error during payment.", "problem_id": "payment_failed"},
+
+    {"id": "k004", "raw_text": "The card was declined but I have money.", "problem_id": "payment_declined"},
+    {"id": "k005", "raw_text": "My payment was declined.", "problem_id": "payment_declined"},
+
+    {"id": "k006", "raw_text": "Payment page froze.", "problem_id": "checkout_stuck"},
+    {"id": "k007", "raw_text": "Checkout keeps loading.", "problem_id": "checkout_stuck"},
+    {"id": "k008", "raw_text": "Checkout spinner never finishes.", "problem_id": "checkout_stuck"},
+
+    {"id": "k009", "raw_text": "Couldn't pay with Apple Pay.", "problem_id": "payment_method_not_working"},
+    {"id": "k010", "raw_text": "Apple Pay button does nothing.", "problem_id": "payment_method_not_working"},
+
+    {"id": "k011", "raw_text": "The app crashes when I tap Pay.", "problem_id": "checkout_crash"},
+    {"id": "k012", "raw_text": "App crashed during checkout.", "problem_id": "checkout_crash"},
+
+    {"id": "k013", "raw_text": "Was charged twice for one order.", "problem_id": "duplicate_charge"},
+    {"id": "k014", "raw_text": "I got double charged.", "problem_id": "duplicate_charge"},
+
+    {"id": "k015", "raw_text": "Payment timed out after 5 minutes.", "problem_id": "payment_timeout"},
+    {"id": "k016", "raw_text": "Checkout is really slow but eventually works.", "problem_id": "checkout_performance"},
+    {"id": "k017", "raw_text": "Subscription renewed after I cancelled.", "problem_id": "incorrect_charge"},
+    {"id": "k018", "raw_text": "I want Apple Pay to be supported.", "problem_id": "payment_method_missing"}
+  ]
+}

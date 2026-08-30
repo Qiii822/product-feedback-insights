@@ -1,0 +1,54 @@
+{
+  "version": "v1",
+  "dimension": "classification",
+  "note": "手标 ground truth（primary_category / issue_type）。覆盖 11 个类 + 易混淆对。",
+  "cases": [
+    {"id": "c001", "raw_text": "Payment failed again.", "expected_category": "payment_failed", "expected_issue_type": "problem"},
+    {"id": "c002", "raw_text": "Payment failed.", "expected_category": "payment_failed", "expected_issue_type": "problem"},
+    {"id": "c003", "raw_text": "Got an error during payment.", "expected_category": "payment_failed", "expected_issue_type": "problem"},
+    {"id": "c004", "raw_text": "The transaction did not go through.", "expected_category": "payment_failed", "expected_issue_type": "problem"},
+
+    {"id": "c005", "raw_text": "The card was declined but I have money.", "expected_category": "payment_declined", "expected_issue_type": "problem"},
+    {"id": "c006", "raw_text": "My payment was declined.", "expected_category": "payment_declined", "expected_issue_type": "problem"},
+    {"id": "c007", "raw_text": "Bank declined my card.", "expected_category": "payment_declined", "expected_issue_type": "problem"},
+
+    {"id": "c008", "raw_text": "Payment timed out after 5 minutes.", "expected_category": "payment_timeout", "expected_issue_type": "problem"},
+    {"id": "c009", "raw_text": "The payment just timed out.", "expected_category": "payment_timeout", "expected_issue_type": "problem"},
+
+    {"id": "c010", "raw_text": "Why is there no PayPal option?", "expected_category": "payment_method_missing", "expected_issue_type": "question"},
+    {"id": "c011", "raw_text": "I want Apple Pay to be supported.", "expected_category": "payment_method_missing", "expected_issue_type": "request"},
+    {"id": "c012", "raw_text": "Can I pay with Apple Pay?", "expected_category": "payment_method_missing", "expected_issue_type": "question"},
+
+    {"id": "c013", "raw_text": "Couldn't pay with Apple Pay.", "expected_category": "payment_method_not_working", "expected_issue_type": "problem"},
+    {"id": "c014", "raw_text": "Apple Pay button does nothing.", "expected_category": "payment_method_not_working", "expected_issue_type": "problem"},
+    {"id": "c015", "raw_text": "Google Pay is broken.", "expected_category": "payment_method_not_working", "expected_issue_type": "problem"},
+
+    {"id": "c016", "raw_text": "Checkout keeps loading.", "expected_category": "checkout_stuck", "expected_issue_type": "problem"},
+    {"id": "c017", "raw_text": "Payment page froze.", "expected_category": "checkout_stuck", "expected_issue_type": "problem"},
+    {"id": "c018", "raw_text": "Checkout spinner never finishes.", "expected_category": "checkout_stuck", "expected_issue_type": "problem"},
+
+    {"id": "c019", "raw_text": "The app crashes when I tap Pay.", "expected_category": "checkout_crash", "expected_issue_type": "problem"},
+    {"id": "c020", "raw_text": "App crashed during checkout.", "expected_category": "checkout_crash", "expected_issue_type": "problem"},
+
+    {"id": "c021", "raw_text": "Checkout is really slow but eventually works.", "expected_category": "checkout_performance", "expected_issue_type": "problem"},
+    {"id": "c022", "raw_text": "The payment page takes forever to load.", "expected_category": "checkout_performance", "expected_issue_type": "problem"},
+
+    {"id": "c023", "raw_text": "Was charged twice for one order.", "expected_category": "duplicate_charge", "expected_issue_type": "problem"},
+    {"id": "c024", "raw_text": "I got double charged.", "expected_category": "duplicate_charge", "expected_issue_type": "problem"},
+
+    {"id": "c025", "raw_text": "Subscription renewed after I cancelled.", "expected_category": "incorrect_charge", "expected_issue_type": "problem"},
+    {"id": "c026", "raw_text": "I was charged the wrong amount.", "expected_category": "incorrect_charge", "expected_issue_type": "problem"},
+
+    {"id": "c027", "raw_text": "The app crashes when I open Settings.", "expected_category": "other", "expected_issue_type": "problem"},
+    {"id": "c028", "raw_text": "I want a refund.", "expected_category": "other", "expected_issue_type": "request"},
+    {"id": "c029", "raw_text": "My refund hasn't arrived.", "expected_category": "other", "expected_issue_type": "problem"},
+    {"id": "c030", "raw_text": "How do I delete my account?", "expected_category": "other", "expected_issue_type": "question"},
+    {"id": "c031", "raw_text": "The app keeps crashing.", "expected_category": "other", "expected_issue_type": "problem"},
+
+    {"id": "c032", "raw_text": "Payment failed after card verification.", "expected_category": "payment_failed", "expected_issue_type": "problem"},
+    {"id": "c033", "raw_text": "3DS verification keeps failing so I can't pay.", "expected_category": "payment_failed", "expected_issue_type": "problem"},
+    {"id": "c034", "raw_text": "Stuck on the 3DS screen forever.", "expected_category": "checkout_stuck", "expected_issue_type": "problem"},
+    {"id": "c035", "raw_text": "It says my payment is processing and never finishes.", "expected_category": "checkout_stuck", "expected_issue_type": "problem"},
+    {"id": "c036", "raw_text": "Payment declined due to insufficient funds.", "expected_category": "payment_declined", "expected_issue_type": "problem"}
+  ]
+}

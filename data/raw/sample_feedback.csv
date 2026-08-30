@@ -1,0 +1,16 @@
+feedback_id,raw_text,timestamp,source,platform,app_version,customer_segment,rating
+fb_001,Payment failed again.,2026-08-01T09:00:00Z,app_review,iOS,2.1.0,free,2
+fb_002,Couldn't pay with Apple Pay.,2026-08-01T09:15:00Z,support_ticket,iPhone,2.1.0,paid,1
+fb_003,Checkout keeps loading.,2026-08-01T10:00:00Z,app_review,Android,2.0.9,free,2
+fb_004,Payment page froze.,2026-08-01T11:30:00Z,nps,web,2.1.0,paid,1
+fb_005,Couldn't pay with Apple Pay.,2026-08-02T09:00:00Z,support_ticket,ios,2.1.0,paid,1
+fb_006,The card was declined but I have money.,2026-08-02T09:20:00Z,support_ticket,Android,2.1.0,premium,1
+fb_007,Checkout keeps loading.,2026-08-02T12:00:00Z,app_review,android,2.0.9,free,3
+fb_008,Payment failed again.,2026-08-03T08:00:00Z,app_review,ios,2.1.1,free,2
+fb_009,Apple Pay button does nothing.,2026-08-03T10:00:00Z,app_review,iPhone,2.1.1,paid,1
+fb_010,Was charged twice for one order.,2026-08-04T09:00:00Z,support_ticket,web,2.1.1,paid,1
+fb_011,Payment failed again.,2026-08-04T10:00:00Z,app_review,iOS,2.1.1,free,1
+fb_012,Subscription renewed after I cancelled.,2026-08-05T09:00:00Z,support_ticket,Android,2.1.1,premium,1
+fb_001,Payment failed again.,2026-08-01T09:00:00Z,app_review,iOS,2.1.0,free,2
+fb_013,App crashed during checkout.,2026-08-06T10:00:00Z,reddit,,2.1.2,,
+fb_014,Payment failed again.,2026-08-06T11:00:00Z,app_review,ios,2.1.2,free,abc

@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# uv / venv
+.venv/
+
+# 环境变量与密钥（.env.example 保留为模板）
+.env
+
+# 数据库与数据文件
+*.db
+*.sqlite3
+data/*.db
+
+# 测试与工具缓存
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE
+.idea/
+.vscode/
+.DS_Store

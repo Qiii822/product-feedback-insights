@@ -1,0 +1,105 @@
+{
+  "n": 36,
+  "accuracy": 0.9167,
+  "macro_f1": 0.897,
+  "issue_type_accuracy": 0.9722,
+  "other_rate": 0.1389,
+  "true_other_rate": 0.1389,
+  "needs_review_rate": 0.1111,
+  "confidence": {
+    "min": 0.6,
+    "mean": 0.8819,
+    "max": 0.95,
+    "histogram": {
+      "0.0-0.2": 0,
+      "0.2-0.4": 0,
+      "0.4-0.6": 0,
+      "0.6-0.8": 4,
+      "0.8-1.0": 32
+    }
+  },
+  "per_category": {
+    "checkout_crash": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "checkout_performance": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "checkout_stuck": [
+      0.8,
+      0.8,
+      0.8
+    ],
+    "duplicate_charge": [
+      0.667,
+      1.0,
+      0.8
+    ],
+    "incorrect_charge": [
+      1.0,
+      0.5,
+      0.667
+    ],
+    "other": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "payment_declined": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "payment_failed": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "payment_method_missing": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "payment_method_not_working": [
+      1.0,
+      0.667,
+      0.8
+    ],
+    "payment_timeout": [
+      0.667,
+      1.0,
+      0.8
+    ]
+  },
+  "failure_count": 3,
+  "failures": [
+    {
+      "id": "c014",
+      "raw_text": "Apple Pay button does nothing.",
+      "expected": "payment_method_not_working",
+      "predicted": "checkout_stuck",
+      "confidence": 0.9,
+      "needs_review": false
+    },
+    {
+      "id": "c025",
+      "raw_text": "Subscription renewed after I cancelled.",
+      "expected": "incorrect_charge",
+      "predicted": "duplicate_charge",
+      "confidence": 0.9,
+      "needs_review": false
+    },
+    {
+      "id": "c035",
+      "raw_text": "It says my payment is processing and never finishes.",
+      "expected": "checkout_stuck",
+      "predicted": "payment_timeout",
+      "confidence": 0.9,
+      "needs_review": false
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+[project]
+name = "ai-feedback-agent"
+version = "0.1.0"
+description = "AI Product Feedback Agent — 将非结构化客户反馈转化为有证据支撑的产品洞察。"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "sqlalchemy>=2.0.30",
+    "alembic>=1.13",
+    "fastembed>=0.3",
+    "numpy>=1.26",
+    "openai>=1.40",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "httpx>=0.27",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

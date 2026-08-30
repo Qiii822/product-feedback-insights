@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "dimension": "prioritisation",
+  "note": "手标 PM 优先级排序（human_order，best first）。用于验证 prioritisation heuristic。",
+  "problems": [
+    {"id": "p1", "title": "Payment failed at checkout", "severity": "critical", "evidence_count": 20, "segments": ["ios", "android", "web"]},
+    {"id": "p2", "title": "Duplicate charge", "severity": "critical", "evidence_count": 8, "segments": ["web"]},
+    {"id": "p3", "title": "Apple Pay not working", "severity": "high", "evidence_count": 15, "segments": ["ios"]},
+    {"id": "p4", "title": "Checkout is slow", "severity": "medium", "evidence_count": 30, "segments": ["android"]},
+    {"id": "p5", "title": "Refund not received", "severity": "medium", "evidence_count": 5, "segments": ["web"]},
+    {"id": "p6", "title": "Missing PayPal option", "severity": "low", "evidence_count": 3, "segments": ["web"]}
+  ],
+  "human_order": ["p1", "p2", "p3", "p4", "p5", "p6"]
+}
