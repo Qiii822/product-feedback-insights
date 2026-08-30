@@ -61,3 +61,14 @@ def run():
         return run_pipeline()
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"分析失败：{exc}") from exc
+
+
+@router.post("/load_sample")
+def load_sample():
+    """载入内置的模拟反馈数据（data/raw/mock_feedback.csv）。"""
+    sample_file = Path(__file__).resolve().parents[3] / "data" / "raw" / "mock_feedback.csv"
+    try:
+        service = IngestionService(SQLFeedbackRepository(SessionLocal))
+        return service.ingest_file(sample_file)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"载入示例失败：{exc}") from exc

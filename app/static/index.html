@@ -20,10 +20,13 @@
         <label class="file-label" for="fileInput">选择反馈文件（CSV / JSON）</label>
         <input type="file" id="fileInput" accept=".csv,.json">
         <button id="ingestBtn" class="btn">上传摄取</button>
+        <button id="sampleBtn" class="btn">载入示例数据</button>
       </div>
       <button id="runBtn" class="btn btn-primary">运行完整分析</button>
       <span id="status" class="status"></span>
     </section>
+
+    <div id="errorBanner" class="error-banner" hidden></div>
 
     <section id="summary" class="summary" hidden></section>
 

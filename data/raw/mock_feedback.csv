@@ -1,0 +1,49 @@
+feedback_id,raw_text,timestamp,source,platform,app_version,customer_segment,rating
+m001,Payment failed when I tried to checkout.,2026-08-01T09:00:00Z,app_review,ios,2.1.0,free,2
+m002,Got an error message during payment.,2026-08-01T09:20:00Z,support_ticket,android,2.1.0,paid,1
+m003,"Payment didn't go through, tried 3 times.",2026-08-01T10:00:00Z,app_review,web,2.1.0,free,2
+m004,Transaction failed with an unknown error.,2026-08-01T10:30:00Z,support_ticket,ios,2.1.0,premium,1
+m005,The payment just failed for no reason.,2026-08-01T11:00:00Z,nps,android,2.1.0,free,2
+m006,My card was declined but I have enough money.,2026-08-01T12:00:00Z,support_ticket,ios,2.1.0,paid,1
+m007,Bank declined the payment twice.,2026-08-02T09:00:00Z,app_review,android,2.1.0,free,1
+m008,Card declined even though it works elsewhere.,2026-08-02T09:30:00Z,support_ticket,web,2.1.0,premium,1
+m009,Payment rejected by my bank.,2026-08-02T10:00:00Z,nps,ios,2.1.0,paid,2
+m010,Payment timed out after waiting 5 minutes.,2026-08-02T11:00:00Z,support_ticket,web,2.1.0,paid,1
+m011,The payment screen just timed out.,2026-08-02T12:00:00Z,app_review,android,2.1.0,free,2
+m012,Timed out while processing payment.,2026-08-03T09:00:00Z,support_ticket,ios,2.1.1,premium,1
+m013,Why is there no PayPal option at checkout?,2026-08-03T10:00:00Z,app_review,web,2.1.1,paid,3
+m014,I want to pay with Apple Pay but it's not listed.,2026-08-03T11:00:00Z,support_ticket,ios,2.1.1,free,2
+m015,Can I pay with Google Pay?,2026-08-03T12:00:00Z,app_review,android,2.1.1,free,3
+m016,Please add crypto payment support.,2026-08-04T09:00:00Z,nps,web,2.1.1,premium,3
+m017,Apple Pay button does nothing when I tap it.,2026-08-04T10:00:00Z,app_review,ios,2.1.1,free,1
+m018,"Couldn't pay with Apple Pay, keeps failing.",2026-08-04T11:00:00Z,support_ticket,ios,2.1.1,paid,1
+m019,Google Pay is broken on Android.,2026-08-04T12:00:00Z,app_review,android,2.1.1,free,1
+m020,Apple Pay worked before but now it errors out.,2026-08-05T09:00:00Z,support_ticket,ios,2.1.1,premium,1
+m021,PayPal option just spins and never completes.,2026-08-05T10:00:00Z,app_review,web,2.1.1,paid,2
+m022,Checkout keeps loading forever.,2026-08-05T11:00:00Z,app_review,android,2.1.1,free,1
+m023,Payment page froze completely.,2026-08-05T12:00:00Z,support_ticket,ios,2.1.1,paid,1
+m024,The checkout spinner never stops.,2026-08-06T09:00:00Z,app_review,web,2.1.1,free,2
+m025,"Stuck on the checkout page, can't proceed.",2026-08-06T10:00:00Z,support_ticket,android,2.1.1,premium,1
+m026,Checkout is stuck on a white screen.,2026-08-06T11:00:00Z,nps,ios,2.1.1,free,1
+m027,The app crashes every time I tap Pay.,2026-08-06T12:00:00Z,app_review,ios,2.1.1,paid,1
+m028,App crashed during checkout.,2026-08-07T09:00:00Z,support_ticket,android,2.1.1,free,1
+m029,Crash when trying to complete my order.,2026-08-07T10:00:00Z,app_review,ios,2.1.1,premium,1
+m030,Checkout is really slow but eventually works.,2026-08-07T11:00:00Z,app_review,android,2.1.1,free,3
+m031,The payment page takes forever to load.,2026-08-07T12:00:00Z,support_ticket,web,2.1.1,paid,2
+m032,Checkout lags a lot on my phone.,2026-08-08T09:00:00Z,app_review,ios,2.1.1,free,3
+m033,I was charged twice for the same order.,2026-08-08T10:00:00Z,support_ticket,web,2.1.1,paid,1
+m034,Double charged for one purchase.,2026-08-08T11:00:00Z,app_review,ios,2.1.1,paid,1
+m035,Got billed two times for a single transaction.,2026-08-08T12:00:00Z,support_ticket,android,2.1.1,premium,1
+m036,Charged again for an order I already paid.,2026-08-09T09:00:00Z,nps,web,2.1.1,free,1
+m037,Subscription renewed after I cancelled it.,2026-08-09T10:00:00Z,support_ticket,android,2.1.1,premium,1
+m038,I was charged the wrong amount.,2026-08-09T11:00:00Z,app_review,ios,2.1.1,paid,1
+m039,Charged for premium but I'm on the free plan.,2026-08-09T12:00:00Z,support_ticket,web,2.1.1,free,1
+m040,Billed for a subscription I never signed up for.,2026-08-10T09:00:00Z,nps,ios,2.1.1,paid,1
+m041,I want a refund for my last order.,2026-08-10T10:00:00Z,support_ticket,web,2.1.1,paid,2
+m042,My refund hasn't arrived after a week.,2026-08-10T11:00:00Z,support_ticket,ios,2.1.1,paid,1
+m043,How do I delete my account?,2026-08-10T12:00:00Z,app_review,android,2.1.1,free,3
+m044,The app crashes when I open Settings.,2026-08-11T09:00:00Z,app_review,ios,2.1.1,free,1
+m045,Great app but the checkout could be faster.,2026-08-11T10:00:00Z,nps,web,2.1.1,premium,4
+m046,Payment failed again.,2026-08-11T11:00:00Z,app_review,ios,2.1.1,free,
+m047,Payment failed again.,2026-08-11T12:00:00Z,app_review,,2.1.1,free,2
+m048,Payment failed again.,2026-08-12T09:00:00Z,app_review,ios,2.1.1,free,abc

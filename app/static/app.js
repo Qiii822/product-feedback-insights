@@ -2,10 +2,13 @@ const $ = (sel) => document.querySelector(sel);
 
 const SEVERITY_LABEL = { low: "低", medium: "中", high: "高", critical: "严重" };
 
-function setStatus(msg, isError = false) {
+function setStatus(msg, isError = false, loading = false) {
   const el = $("#status");
   el.textContent = msg;
-  el.className = "status" + (isError ? " error" : "");
+  el.className = "status" + (isError ? " error" : "") + (loading ? " loading" : "");
+  const banner = $("#errorBanner");
+  banner.hidden = !isError;
+  if (isError) banner.textContent = "⚠️ " + msg;
 }
 
 async function postJSON(url, body) {
@@ -36,17 +39,32 @@ async function handleIngest() {
   }
 }
 
+async function handleSample() {
+  setStatus("正在载入示例数据…", false, true);
+  try {
+    const result = await postJSON("/api/load_sample", {});
+    setStatus(`示例数据已载入：${result.added} 条反馈`);
+    await loadFeedback();
+  } catch (e) {
+    setStatus("载入失败：" + e.message, true);
+  }
+}
+
 async function handleRun() {
-  setStatus("正在运行完整分析（含 LLM 调用，约需 30~60 秒）…");
-  $("#runBtn").disabled = true;
+  setStatus("正在运行完整分析（含 LLM 调用，约需 30~60 秒）…", false, true);
+  ["#runBtn", "#ingestBtn", "#sampleBtn"].forEach((s) => ($(s).disabled = true));
   try {
     const data = await postJSON("/api/run", {});
+    if (data.feedback_count === 0) {
+      setStatus("还没有反馈数据，请先上传或载入示例数据", true);
+      return;
+    }
     render(data);
     setStatus("分析完成 ✓");
   } catch (e) {
     setStatus("分析失败：" + e.message, true);
   } finally {
-    $("#runBtn").disabled = false;
+    ["#runBtn", "#ingestBtn", "#sampleBtn"].forEach((s) => ($(s).disabled = false));
   }
 }
 
@@ -153,5 +171,6 @@ function escapeHtml(s) {
 }
 
 $("#ingestBtn").addEventListener("click", handleIngest);
+$("#sampleBtn").addEventListener("click", handleSample);
 $("#runBtn").addEventListener("click", handleRun);
 loadFeedback();
