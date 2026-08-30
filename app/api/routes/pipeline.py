@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.db.session import SessionLocal
+from app.repositories.problem import SQLProblemRepository
 from app.repositories.sql import SQLFeedbackRepository
 from app.services.ingestion import IngestionService
 from app.services.pipeline import run_pipeline
@@ -65,10 +66,12 @@ def run():
 
 @router.post("/load_sample")
 def load_sample():
-    """载入内置的模拟反馈数据（data/raw/mock_feedback.csv）。"""
+    """清空并重新载入内置模拟数据（data/raw/mock_feedback.csv），保证每次都是干净的 48 条。"""
     sample_file = Path(__file__).resolve().parents[3] / "data" / "raw" / "mock_feedback.csv"
     try:
-        service = IngestionService(SQLFeedbackRepository(SessionLocal))
-        return service.ingest_file(sample_file)
+        item_repo = SQLFeedbackRepository(SessionLocal)
+        SQLProblemRepository(SessionLocal).clear()  # 清旧问题 / 证据 / 机会
+        item_repo.clear()  # 清旧反馈
+        return IngestionService(item_repo).ingest_file(sample_file)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=f"载入示例失败：{exc}") from exc

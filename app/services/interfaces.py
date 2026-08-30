@@ -59,6 +59,10 @@ class FeedbackRepository(ABC):
     def get_existing_feedback_ids(self) -> set[str]:
         """返回已存在的所有 feedback_id（摄取精确去重用）。"""
 
+    @abstractmethod
+    def clear(self) -> None:
+        """清空全部反馈（重载示例数据前用）。"""
+
 
 class FeedbackAnalyzer(ABC):
     """反馈理解：单条反馈 → 结构化分析（Phase 3 实现）。"""

@@ -4,7 +4,7 @@
 保持职责单一。ORM ↔ Pydantic 的映射内聚在本模块。
 """
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.models.feedback import FeedbackItemModel
@@ -69,3 +69,8 @@ class SQLFeedbackRepository(FeedbackRepository):
         with self._session_factory() as session:
             ids = session.scalars(select(FeedbackItemModel.feedback_id)).all()
             return set(ids)
+
+    def clear(self):
+        with self._session_factory() as session:
+            session.execute(delete(FeedbackItemModel))
+            session.commit()

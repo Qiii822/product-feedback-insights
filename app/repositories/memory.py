@@ -29,3 +29,6 @@ class InMemoryFeedbackRepository(FeedbackRepository):
 
     def get_existing_feedback_ids(self):
         return {item.feedback_id for item in self._items.values()}
+
+    def clear(self):
+        self._items.clear()

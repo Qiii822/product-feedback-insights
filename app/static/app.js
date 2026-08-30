@@ -43,7 +43,7 @@ async function handleSample() {
   setStatus("正在载入示例数据…", false, true);
   try {
     const result = await postJSON("/api/load_sample", {});
-    setStatus(`示例数据已载入：${result.added} 条反馈`);
+    setStatus(`已重置并载入示例数据：${result.added} 条反馈`);
     await loadFeedback();
   } catch (e) {
     setStatus("载入失败：" + e.message, true);
