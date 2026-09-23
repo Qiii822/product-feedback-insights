@@ -3,7 +3,11 @@
 from app.schemas.analysis import FeedbackAnalysis
 from app.schemas.enums import IssueType, PrimaryCategory, Severity
 from app.schemas.feedback import FeedbackItem
-from app.services.clustering import EmbeddingClusteringService, agglomerative_cluster
+from app.services.clustering import (
+    EmbeddingClusteringService,
+    agglomerative_cluster,
+    problem_confidence,
+)
 from app.services.llm import FakeLLM
 
 
@@ -93,3 +97,29 @@ def test_clustering_excludes_other_and_counts():
     assert result.other_count == 1
     assert abs(result.other_percentage - 100 / 3) < 0.01
     assert result.other_samples == ["I want a refund"]
+
+
+def test_problem_confidence_grows_with_cohesion_and_evidence():
+    low = problem_confidence(0.0, 1)   # 单成员候选
+    mid = problem_confidence(0.75, 3)
+    high = problem_confidence(0.95, 20)  # 证据封顶
+    assert 0.0 <= low < mid < high <= 0.95
+
+
+def test_problem_confidence_singleton_is_low():
+    assert problem_confidence(0.0, 1) < 0.5
+
+
+def test_cluster_needs_review_propagates_from_analysis():
+    # 簇内任一成员在反馈理解阶段被标记需复核 → 整个簇 needs_review=True
+    items = [_item("fb_1", "Payment failed"), _item("fb_2", "Payment failed")]
+    a1 = _analysis(items[0])
+    a2 = _analysis(items[1]).model_copy(update={"needs_review": True})
+    service = EmbeddingClusteringService(_StubEmbedder(), FakeLLM(), threshold=0.9)
+    result = service.cluster(items, [a1, a2])
+
+    confirmed = [p for p in result.problems if not p.needs_review]
+    candidates = [p for p in result.problems if p.needs_review]
+    assert len(confirmed) == 0
+    assert len(candidates) == 1
+    assert candidates[0].evidence_count == 2

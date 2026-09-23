@@ -1,0 +1,111 @@
+{
+  "n": 41,
+  "accuracy": 1.0,
+  "macro_f1": 1.0,
+  "issue_type_accuracy": 1.0,
+  "other_rate": 0.122,
+  "true_other_rate": 0.122,
+  "needs_review_rate": 0.2927,
+  "confidence": {
+    "min": 0.55,
+    "mean": 0.811,
+    "max": 0.95,
+    "histogram": {
+      "0.0-0.2": 0,
+      "0.2-0.4": 0,
+      "0.4-0.6": 1,
+      "0.6-0.8": 13,
+      "0.8-1.0": 27
+    }
+  },
+  "calibration": {
+    "ece": 0.189,
+    "reliability": [
+      {
+        "range": "0.00-0.20",
+        "n": 0
+      },
+      {
+        "range": "0.20-0.40",
+        "n": 0
+      },
+      {
+        "range": "0.40-0.60",
+        "n": 1,
+        "confidence": 0.55,
+        "accuracy": 1.0
+      },
+      {
+        "range": "0.60-0.80",
+        "n": 13,
+        "confidence": 0.6538,
+        "accuracy": 1.0
+      },
+      {
+        "range": "0.80-1.00",
+        "n": 27,
+        "confidence": 0.8963,
+        "accuracy": 1.0
+      }
+    ]
+  },
+  "per_category": {
+    "checkout_crash": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "checkout_performance": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "checkout_stuck": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "duplicate_charge": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "incorrect_charge": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "other": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "payment_declined": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "payment_failed": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "payment_method_missing": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "payment_method_not_working": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "payment_timeout": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "failure_count": 0,
+  "failures": []
+}

@@ -25,10 +25,12 @@ class LLMFeedbackAnalyzer(FeedbackAnalyzer):
         *,
         model: str = "fake",
         prompt_version: str = "v1",
+        review_threshold: float = 0.7,
     ) -> None:
         self._llm = llm
         self._model = model
         self._prompt_version = prompt_version
+        self._review_threshold = review_threshold
 
     def analyze(self, item: FeedbackItem) -> FeedbackAnalysis:
         messages = build_analysis_messages(item)
@@ -39,6 +41,11 @@ class LLMFeedbackAnalyzer(FeedbackAnalyzer):
         if not raw.summary.strip():
             raise ValueError("LLM 输出的 summary 为空，视为非法输出")
 
+        # 确定性 needs_review 触发：不信任 LLM 的"自我感觉"——若其自评
+        # confidence 低于阈值，即使它声称不需要复核，也强制 needs_review=True。
+        # 这是通用的不确定性信号，不是针对某条测试数据。
+        needs_review = raw.needs_review or raw.confidence < self._review_threshold
+
         return FeedbackAnalysis(
             id=uuid.uuid4().hex,
             feedback_item_id=item.id,
@@ -48,7 +55,7 @@ class LLMFeedbackAnalyzer(FeedbackAnalyzer):
             severity=raw.severity,
             entities=raw.entities,
             confidence=raw.confidence,
-            needs_review=raw.needs_review,
+            needs_review=needs_review,
             model=self._model,
             prompt_version=self._prompt_version,
         )

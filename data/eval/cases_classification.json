@@ -49,6 +49,12 @@
     {"id": "c033", "raw_text": "3DS verification keeps failing so I can't pay.", "expected_category": "payment_failed", "expected_issue_type": "problem"},
     {"id": "c034", "raw_text": "Stuck on the 3DS screen forever.", "expected_category": "checkout_stuck", "expected_issue_type": "problem"},
     {"id": "c035", "raw_text": "It says my payment is processing and never finishes.", "expected_category": "checkout_stuck", "expected_issue_type": "problem"},
-    {"id": "c036", "raw_text": "Payment declined due to insufficient funds.", "expected_category": "payment_declined", "expected_issue_type": "problem"}
+    {"id": "c036", "raw_text": "Payment declined due to insufficient funds.", "expected_category": "payment_declined", "expected_issue_type": "problem"},
+
+    {"id": "c037", "raw_text": "The checkout page keeps loading and never lets me finish.", "expected_category": "checkout_stuck", "expected_issue_type": "problem"},
+    {"id": "c038", "raw_text": "I got charged twice on my card.", "expected_category": "duplicate_charge", "expected_issue_type": "problem"},
+    {"id": "c039", "raw_text": "They billed me again after I cancelled my subscription.", "expected_category": "incorrect_charge", "expected_issue_type": "problem"},
+    {"id": "c040", "raw_text": "Apple Pay doesn't show up as a payment option.", "expected_category": "payment_method_missing", "expected_issue_type": "problem"},
+    {"id": "c041", "raw_text": "My payment is stuck on the processing screen.", "expected_category": "checkout_stuck", "expected_issue_type": "problem"}
   ]
 }

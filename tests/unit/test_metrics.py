@@ -3,6 +3,7 @@
 from app.evaluation.metrics import (
     accuracy,
     adjusted_rand_index,
+    expected_calibration_error,
     macro_f1,
     pairwise_prf,
     spearman_between_orders,
@@ -54,3 +55,14 @@ def test_spearman_perfect_and_reversed():
 
 def test_top_k_overlap():
     assert top_k_overlap(["a", "b", "c"], ["a", "x", "c"], 3) == 2 / 3
+
+
+def test_ece_perfect_calibration_is_zero():
+    ece = expected_calibration_error([1.0, 1.0, 1.0], [True, True, True])
+    assert ece == 0.0
+
+
+def test_ece_overconfidence_is_positive():
+    # 模型全标 0.9，但实际只有一半对 → overconfidence → ECE 明显 > 0
+    ece = expected_calibration_error([0.9, 0.9, 0.9, 0.9], [True, True, False, False])
+    assert ece > 0.1

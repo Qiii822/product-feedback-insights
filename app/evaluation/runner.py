@@ -8,9 +8,11 @@ from app.evaluation import cases as case_loader
 from app.evaluation.metrics import (
     accuracy,
     adjusted_rand_index,
+    expected_calibration_error,
     macro_f1,
     pairwise_prf,
     per_label_prf,
+    reliability_curve,
     spearman_between_orders,
     top_k_overlap,
 )
@@ -63,6 +65,7 @@ def run_classification(llm=None, model: str = "fake") -> dict:
 
     labels = sorted(set(true_cat))
     confs = sorted(confidences)
+    corrects = [t == p for t, p in zip(true_cat, pred_cat)]
     return {
         "n": len(cases),
         "accuracy": round(accuracy(true_cat, pred_cat), 4),
@@ -76,6 +79,10 @@ def run_classification(llm=None, model: str = "fake") -> dict:
             "mean": round(sum(confs) / len(confs), 4) if confs else None,
             "max": round(confs[-1], 4) if confs else None,
             "histogram": _histogram(confidences),
+        },
+        "calibration": {
+            "ece": expected_calibration_error(confidences, corrects),
+            "reliability": reliability_curve(confidences, corrects),
         },
         "per_category": {
             l: [round(x, 3) for x in per_label_prf(true_cat, pred_cat, labels)[l]]

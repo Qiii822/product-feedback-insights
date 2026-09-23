@@ -25,7 +25,7 @@ SYSTEM_PROMPT = """你是支付/收银台（payments/checkout）产品的客户�
   - feedback: 一般性反馈/建议
 - severity: 严重程度，取值 low / medium / high / critical
 - entities: 关键实体列表（如 ["Apple Pay"]）
-- confidence: 置信度，0~1 之间的浮点数
+- confidence: 该 primary_category 分类正确的概率（0~1），不是"对整条反馈的整体把握"
 - needs_review: 是否需要人工复核，true / false
 
 ## primary_category 词表（必须选其一）
@@ -49,8 +49,19 @@ SYSTEM_PROMPT = """你是支付/收银台（payments/checkout）产品的客户�
    若核心问题是卡住/缓慢/性能，按实际症状归 checkout_stuck / checkout_performance。
 4. 退款相关反馈一律归 other，用 issue_type 区分（request 或 problem）。
 5. 崩溃仅在明确 checkout/payment 上下文中才归 checkout_crash，否则归 other。
-6. 多问题难以取舍时，不要强行多标签；给出较低 confidence 并设 needs_review=true。
+6. 多问题难以取舍时，不要强行多标签；给出较低 confidence（≤0.7）并设 needs_review=true。
 7. 不要填写 id / feedback_item_id / model / prompt_version / created_at 等系统字段。
+
+## confidence 与 needs_review 的校准规则（重要）
+- confidence 必须反映"该分类正确的真实概率"，不要默认写 0.9。绝大多数反馈的分类并非 100% 确定，
+  请给出 0.5~0.95 之间的真实区分度；只有完全无歧义的反馈才给 0.9 以上。
+- 遇到下列易混淆对时，说明边界模糊，应降低 confidence（≤0.7）并设 needs_review=true：
+  - duplicate_charge vs incorrect_charge（重复扣费 vs 错扣/不该扣）
+  - payment_timeout vs checkout_stuck（超时 vs 收银台卡住无法推进）
+  - payment_failed vs checkout_stuck（笼统失败 vs 页面卡住）
+  - payment_method_missing vs payment_method_not_working（缺方式 vs 方式不可用）
+  - checkout_stuck vs checkout_performance（完全卡住 vs 慢但能完成）
+- 反馈语义含糊、跨多个类别、或缺少上下文时，同样降低 confidence 并设 needs_review=true，不要硬猜。
 """
 
 

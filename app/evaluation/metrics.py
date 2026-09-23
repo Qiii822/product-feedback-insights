@@ -100,3 +100,53 @@ def top_k_overlap(order_a: list, order_b: list, k: int) -> float:
         return 0.0
     k = min(k, len(order_a), len(order_b))
     return len(set(order_a[:k]) & set(order_b[:k])) / k
+
+
+def expected_calibration_error(
+    confidences: list[float], corrects: list[bool], n_bins: int = 5
+) -> float:
+    """Expected Calibration Error（ECE）：按置信度分桶后，|实际准确率 − 平均置信度| 的加权平均。
+
+    数值越低越校准（0 = 完美校准）；高 ECE 即 overconfidence。
+    """
+    if not confidences:
+        return 0.0
+    buckets: list[list[tuple[float, bool]]] = [[] for _ in range(n_bins)]
+    for conf, corr in zip(confidences, corrects):
+        idx = min(int(conf * n_bins), n_bins - 1)
+        buckets[idx].append((conf, corr))
+    n = len(confidences)
+    ece = 0.0
+    for bucket in buckets:
+        if not bucket:
+            continue
+        mean_conf = sum(c for c, _ in bucket) / len(bucket)
+        acc = sum(1 for _, corr in bucket if corr) / len(bucket)
+        ece += (len(bucket) / n) * abs(acc - mean_conf)
+    return round(ece, 4)
+
+
+def reliability_curve(
+    confidences: list[float], corrects: list[bool], n_bins: int = 5
+) -> list[dict]:
+    """可靠性曲线：按置信度分桶，返回每桶的 (范围, 条数, 平均置信度, 实际准确率)。
+
+    用于直观看出"模型标 0.9 的桶实际准确率只有多少"。
+    """
+    if not confidences:
+        return []
+    buckets: list[list[tuple[float, bool]]] = [[] for _ in range(n_bins)]
+    for conf, corr in zip(confidences, corrects):
+        idx = min(int(conf * n_bins), n_bins - 1)
+        buckets[idx].append((conf, corr))
+    curve = []
+    for i, bucket in enumerate(buckets):
+        lo, hi = i / n_bins, (i + 1) / n_bins
+        entry: dict = {"range": f"{lo:.2f}-{hi:.2f}", "n": len(bucket)}
+        if bucket:
+            mean_conf = sum(c for c, _ in bucket) / len(bucket)
+            acc = sum(1 for _, corr in bucket if corr) / len(bucket)
+            entry["confidence"] = round(mean_conf, 4)
+            entry["accuracy"] = round(acc, 4)
+        curve.append(entry)
+    return curve

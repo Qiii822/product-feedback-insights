@@ -40,6 +40,20 @@ _SEVERITY_RANK = {
 }
 
 
+def problem_confidence(cohesion_score: float, evidence_count: int) -> float:
+    """确定性问题置信度（替代旧的 0.5 占位）。
+
+    信号：
+    - cohesion_score：簇内平均到质心相似度（主信号，0~1）。
+    - evidence_count：支撑证据数（辅信号，封顶到 10，避免"两条噪声凑一簇"虚高）。
+
+    单成员簇（cohesion=0、evidence=1）自然得到较低置信度，与其 needs_review 一致。
+    与 ADR-017 的"confidence 需可解释的确定性公式"一致，取代 provisional 0.5。
+    """
+    size_signal = min(evidence_count, 10) / 10.0
+    return round(min(0.95, 0.35 + 0.45 * cohesion_score + 0.15 * size_signal), 4)
+
+
 def cosine_similarity_matrix(embeddings: list[list[float]]) -> np.ndarray:
     """计算两两余弦相似度矩阵（先归一化再点积）。"""
     M = np.asarray(embeddings, dtype=np.float64)
@@ -173,7 +187,10 @@ class EmbeddingClusteringService(ClusteringService):
         )
         platforms = [item.platform for item, _, _ in members if item.platform]
         affected = [p for p, _ in Counter(platforms).most_common()]
-        needs_review = len(members) == 1
+        # needs_review：单成员簇必然需复核；此外，只要簇内有任一成员在
+        # 反馈理解阶段被标记需复核（分类不确定），整个簇也需复核——
+        # 因为 category-aware 聚类依赖分类正确性，分类不确定会污染分组。
+        needs_review = len(members) == 1 or any(a.needs_review for _, a, _ in members)
 
         # cohesion：簇内平均到质心的相似度（单成员无意义，记 0.0）
         cohesion = 0.0
@@ -192,7 +209,7 @@ class EmbeddingClusteringService(ClusteringService):
             category=category,
             severity=severity,
             affected_segments=affected,
-            confidence=0.5,  # provisional 占位（未校准，不用于产品决策）
+            confidence=problem_confidence(cohesion, len(members)),
             cohesion_score=round(cohesion, 4),
             needs_review=needs_review,
             evidence_count=len(members),
