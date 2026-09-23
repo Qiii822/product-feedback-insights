@@ -7,10 +7,13 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from app.core.config import settings
 from app.db.session import SessionLocal
+from app.evaluation.runner import run_classification
 from app.repositories.problem import SQLProblemRepository
 from app.repositories.sql import SQLFeedbackRepository
 from app.services.ingestion import IngestionService
+from app.services.llm import get_llm
 from app.services.pipeline import run_pipeline
 
 router = APIRouter(prefix="/api", tags=["pipeline"])
@@ -64,6 +67,17 @@ def run():
         return run_pipeline()
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"分析失败：{exc}") from exc
+
+
+@router.post("/evaluate")
+def evaluate():
+    """运行分类评估（ground-truth 手标集），返回 accuracy / F1 / per-category / reliability / needs_review 等指标。"""
+    try:
+        llm = get_llm()
+        model = settings.deepseek_model if settings.deepseek_api_key else "fake"
+        return run_classification(llm, model=model)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"评估失败：{exc}") from exc
 
 
 @router.post("/load_sample")

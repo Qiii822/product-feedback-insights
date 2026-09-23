@@ -66,14 +66,23 @@ def run_classification(llm=None, model: str = "fake") -> dict:
     labels = sorted(set(true_cat))
     confs = sorted(confidences)
     corrects = [t == p for t, p in zip(true_cat, pred_cat)]
+    # needs_review 召回：错误预测里，被 needs_review 标记出来的比例（模型能否"自曝"自己的错误）。
+    error_indices = [i for i, (t, p) in enumerate(zip(true_cat, pred_cat)) if t != p]
+    needs_review_recall = (
+        round(sum(needs_review_flags[i] for i in error_indices) / len(error_indices), 4)
+        if error_indices
+        else None
+    )
     return {
         "n": len(cases),
+        "model": model,
         "accuracy": round(accuracy(true_cat, pred_cat), 4),
         "macro_f1": round(macro_f1(true_cat, pred_cat, labels), 4),
         "issue_type_accuracy": round(accuracy(true_it, pred_it), 4),
         "other_rate": round(sum(p == "other" for p in pred_cat) / len(pred_cat), 4),
         "true_other_rate": round(sum(t == "other" for t in true_cat) / len(true_cat), 4),
         "needs_review_rate": round(sum(needs_review_flags) / len(needs_review_flags), 4),
+        "needs_review_recall": needs_review_recall,
         "confidence": {
             "min": round(confs[0], 4) if confs else None,
             "mean": round(sum(confs) / len(confs), 4) if confs else None,

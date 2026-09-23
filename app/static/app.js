@@ -183,6 +183,77 @@ function countEvidence(texts) {
     .slice(0, 6);
 }
 
+async function handleEvaluate() {
+  const btn = $("#evalBtn");
+  const status = $("#evalStatus");
+  btn.disabled = true;
+  status.textContent = "正在运行分类评估（真实 LLM 约 30~60 秒）…";
+  status.className = "status loading";
+  try {
+    const data = await postJSON("/api/evaluate", {});
+    renderQuality(data);
+    status.textContent = `评估完成 · model ${data.model} · ${data.n} 条用例`;
+    status.className = "status";
+  } catch (e) {
+    status.textContent = "评估失败：" + e.message;
+    status.className = "status error";
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderQuality(r) {
+  const el = $("#qualityResult");
+  el.hidden = false;
+  const recall = r.needs_review_recall == null ? "—" : r.needs_review_recall.toFixed(3);
+  const stats = [
+    { label: "Accuracy", value: (r.accuracy * 100).toFixed(1) + "%" },
+    { label: "Macro F1", value: r.macro_f1.toFixed(3) },
+    { label: "Issue Type Acc", value: (r.issue_type_accuracy * 100).toFixed(1) + "%" },
+    { label: "Needs Review Rate", value: (r.needs_review_rate * 100).toFixed(1) + "%" },
+    { label: "Needs Review 召回", value: recall },
+    { label: "ECE", value: r.calibration.ece.toFixed(3) },
+  ];
+  const statHtml = stats
+    .map((s) => `<div class="stat"><div class="stat-value">${s.value}</div><div class="stat-label">${s.label}</div></div>`)
+    .join("");
+
+  const rows = Object.entries(r.per_category)
+    .map(([cat, prf]) => {
+      const [p, rec, f1] = prf;
+      return `<tr><td>${cat}</td><td>${p.toFixed(2)}</td><td>${rec.toFixed(2)}</td><td>${f1.toFixed(2)}</td></tr>`;
+    })
+    .join("");
+
+  const rel = (r.calibration.reliability || [])
+    .filter((b) => b.n > 0)
+    .map((b) => {
+      const accPct = (b.accuracy * 100).toFixed(0);
+      const confPct = (b.confidence * 100).toFixed(0);
+      return `<div class="rel-row">
+        <div class="rel-label">${b.range}<span class="rel-n">n=${b.n}</span></div>
+        <div class="rel-bar">
+          <div class="rel-fill" style="width:${accPct}%"></div>
+          <div class="rel-marker" style="left:${confPct}%" title="confidence ${b.confidence}"></div>
+        </div>
+        <div class="rel-values">acc ${b.accuracy.toFixed(2)} · conf ${b.confidence.toFixed(2)}</div>
+      </div>`;
+    })
+    .join("");
+
+  el.innerHTML = `
+    <div class="summary">${statHtml}</div>
+    <div class="q-block">
+      <h3>每类表现（precision / recall / F1）</h3>
+      <table class="q-table"><thead><tr><th>category</th><th>P</th><th>R</th><th>F1</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>
+    <div class="q-block">
+      <h3>可靠性曲线（置信度分桶 vs 实际准确率）</h3>
+      <div class="rel">${rel}</div>
+      <p class="q-note">绿色条 = 实际准确率，竖线 = 模型自评置信度。竖线在条右 → 过度自信；在条左 → 过于谨慎。</p>
+    </div>`;
+}
+
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
@@ -190,4 +261,5 @@ function escapeHtml(s) {
 $("#ingestBtn").addEventListener("click", handleIngest);
 $("#sampleBtn").addEventListener("click", handleSample);
 $("#runBtn").addEventListener("click", handleRun);
+$("#evalBtn").addEventListener("click", handleEvaluate);
 loadFeedback();

@@ -6,7 +6,7 @@
 
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -25,6 +25,14 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(pipeline_router)
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+    @app.middleware("http")
+    async def no_cache_static(request: Request, call_next):
+        # 开发期给静态资源加 no-cache，避免浏览器缓存旧 JS/CSS 导致改动不生效
+        response = await call_next(request)
+        if request.url.path.startswith("/static/"):
+            response.headers["Cache-Control"] = "no-cache"
+        return response
 
     @app.get("/")
     def index():

@@ -196,3 +196,21 @@ body {
   white-space: nowrap;
 }
 .fb-text { flex: 1; }
+
+/* 系统质量评估（分类评估） */
+.quality-note { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.q-block { margin-top: 20px; }
+.q-block h3 { font-size: 15px; margin: 0 0 8px; }
+.q-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.q-table th, .q-table td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+.q-table th { color: var(--muted); font-weight: 600; }
+.q-table td:not(:first-child), .q-table th:not(:first-child) { text-align: right; }
+.rel { display: grid; gap: 8px; margin-top: 8px; }
+.rel-row { display: grid; grid-template-columns: 150px 1fr 140px; gap: 10px; align-items: center; }
+.rel-label { font-size: 13px; color: var(--text); }
+.rel-n { color: var(--muted); margin-left: 6px; font-size: 12px; }
+.rel-bar { position: relative; height: 14px; background: #eef2ff; border-radius: 7px; }
+.rel-fill { position: absolute; left: 0; top: 0; bottom: 0; background: #34d399; border-radius: 7px; }
+.rel-marker { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--accent); }
+.rel-values { font-size: 12px; color: var(--muted); }
+.q-note { font-size: 12px; color: var(--muted); margin-top: 8px; }
