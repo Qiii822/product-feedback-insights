@@ -89,6 +89,7 @@ def run_pipeline() -> dict:
         return {
             "id": p.id,
             "title": p.title,
+            "description": p.description,
             "category": p.category.value if p.category else None,
             "severity": p.severity.value if p.severity else None,
             "evidence_count": p.evidence_count,
@@ -111,6 +112,8 @@ def run_pipeline() -> dict:
                 "summary": opportunity.summary,
                 "recommendation": opportunity.recommendation,
                 "expected_impact": opportunity.expected_impact,
+                "action_items": opportunity.action_items,
+                "success_metrics": opportunity.success_metrics,
                 "evidence_count": len(opportunity.evidence_refs),
             }
             if opportunity

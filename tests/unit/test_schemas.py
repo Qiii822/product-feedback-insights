@@ -101,3 +101,11 @@ def test_analysis_needs_review_defaults_false():
         confidence=0.5,
     )
     assert a.needs_review is False
+
+
+def test_opportunity_defaults_action_items_and_metrics():
+    from app.schemas.opportunity import ProductOpportunity
+
+    opp = ProductOpportunity(title="x", recommendation="y")
+    assert opp.action_items == []
+    assert opp.success_metrics == []

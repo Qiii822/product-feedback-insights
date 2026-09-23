@@ -24,3 +24,13 @@ def test_generate_returns_grounded_opportunity():
     assert opp.product_problem_id == problem.id
     assert opp.evidence_refs == ["id1", "id2"]
     assert opp.recommendation
+
+
+def test_generate_passes_through_action_items_and_metrics():
+    gen = LLMOpportunityGenerator(FakeLLM())
+    problem = _problem()
+    evidence = [Evidence(feedback_item_id="id1")]
+    texts = {"id1": "Payment failed again."}
+    opp = gen.generate(problem, evidence, texts)
+    assert opp.action_items
+    assert opp.success_metrics

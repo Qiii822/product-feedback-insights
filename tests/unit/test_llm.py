@@ -36,6 +36,37 @@ def test_fake_llm_returns_cluster_naming():
     assert out.title
 
 
+def test_fake_llm_grounds_category_from_keywords():
+    llm = FakeLLM()
+    out = llm.complete(
+        messages=[{"role": "user", "content": "My card was declined but I have money."}],
+        output_schema=FeedbackAnalysis,
+    )
+    assert out.primary_category.value == "payment_declined"
+
+
+def test_fake_llm_grounds_naming_from_keywords():
+    from app.schemas.clustering import ClusterNaming
+
+    llm = FakeLLM()
+    out = llm.complete(
+        messages=[{"role": "user", "content": "Checkout keeps loading forever."}],
+        output_schema=ClusterNaming,
+    )
+    assert "卡住" in out.title
+
+
+def test_fake_llm_grounds_opportunity_with_action_items():
+    llm = FakeLLM()
+    out = llm.complete(
+        messages=[{"role": "user", "content": "I was charged twice for the same order."}],
+        output_schema=ProductOpportunity,
+    )
+    assert "重复扣费" in out.title
+    assert out.action_items
+    assert out.success_metrics
+
+
 def test_fake_llm_rejects_unknown_schema():
     llm = FakeLLM()
     with pytest.raises(NotImplementedError):

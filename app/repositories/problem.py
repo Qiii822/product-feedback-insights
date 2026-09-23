@@ -77,6 +77,8 @@ def _opportunity_to_model(o: ProductOpportunity) -> ProductOpportunityModel:
         summary=o.summary,
         recommendation=o.recommendation,
         expected_impact=o.expected_impact,
+        action_items=o.action_items,
+        success_metrics=o.success_metrics,
         confidence=o.confidence,
         evidence_refs=o.evidence_refs,
     )

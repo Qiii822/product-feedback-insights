@@ -22,7 +22,7 @@ class LLMOpportunityGenerator(ProductOpportunityGenerator):
         llm: LLMClient,
         *,
         model: str = "fake",
-        prompt_version: str = "v1",
+        prompt_version: str = "v2",
     ) -> None:
         self._llm = llm
         self._model = model
@@ -50,6 +50,8 @@ class LLMOpportunityGenerator(ProductOpportunityGenerator):
             summary=draft.summary,
             recommendation=draft.recommendation,
             expected_impact=draft.expected_impact,
+            action_items=draft.action_items,
+            success_metrics=draft.success_metrics,
             confidence=0.5,  # provisional 占位（未校准）
             evidence_refs=refs,
         )

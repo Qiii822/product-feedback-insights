@@ -115,10 +115,19 @@ function renderOpportunity(opp) {
     return;
   }
   el.hidden = false;
+  const steps = opp.action_items && opp.action_items.length
+    ? `<div class="opp-block"><h4>建议步骤</h4><ol class="opp-list">${opp.action_items.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ol></div>`
+    : "";
+  const metrics = opp.success_metrics && opp.success_metrics.length
+    ? `<div class="opp-block"><h4>如何验证</h4><ul class="opp-list">${opp.success_metrics.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ul></div>`
+    : "";
   el.innerHTML = `
     <div class="opp-title">💡 Top 产品机会</div>
     <h3>${escapeHtml(opp.title)}</h3>
+    ${opp.summary ? `<p class="opp-summary">${escapeHtml(opp.summary)}</p>` : ""}
     <div class="opp-reco">${escapeHtml(opp.recommendation)}</div>
+    ${steps}
+    ${metrics}
     ${opp.expected_impact ? `<div class="opp-impact">预期影响：${escapeHtml(opp.expected_impact)}</div>` : ""}
     <div class="opp-meta">引用证据 ${opp.evidence_count} 条</div>`;
 }
@@ -145,6 +154,7 @@ function renderCandidates(candidates) {
 
 function problemCard(p) {
   const sev = p.severity || "unknown";
+  const evidence = countEvidence(p.evidence || []);
   return `
     <div class="card">
       <div class="card-head">
@@ -153,17 +163,24 @@ function problemCard(p) {
         <span class="badge severity-${sev}">${SEVERITY_LABEL[sev] || sev}</span>
         <span class="badge category">${p.category || "?"}</span>
       </div>
+      ${p.description ? `<p class="card-desc">${escapeHtml(p.description)}</p>` : ""}
       <div class="card-meta">
         <span>证据 ${p.evidence_count} 条</span>
         <span>cohesion ${p.cohesion.toFixed(2)}</span>
         ${p.priority_score ? `<span>score ${p.priority_score.toFixed(3)}</span>` : ""}
         ${p.affected_segments && p.affected_segments.length ? `<span>平台 ${p.affected_segments.join(", ")}</span>` : ""}
       </div>
-      <ul class="evidence">
-        ${p.evidence.slice(0, 6).map((e) => `<li>${escapeHtml(e)}</li>`).join("")}
-        ${p.evidence.length > 6 ? `<li class="more">… 共 ${p.evidence.length} 条</li>` : ""}
-      </ul>
+      ${evidence.length ? `<div class="evidence-label">证据表现</div><ul class="evidence">${evidence.map((e) => `<li>${escapeHtml(e.text)}${e.count > 1 ? `<span class="count">×${e.count}</span>` : ""}</li>`).join("")}</ul>` : ""}
     </div>`;
+}
+
+function countEvidence(texts) {
+  const counts = {};
+  texts.forEach((t) => (counts[t] = (counts[t] || 0) + 1));
+  return Object.entries(counts)
+    .map(([text, count]) => ({ text, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
 }
 
 function escapeHtml(s) {

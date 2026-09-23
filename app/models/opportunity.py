@@ -22,6 +22,8 @@ class ProductOpportunityModel(Base):
     summary: Mapped[str] = mapped_column(Text, default="")
     recommendation: Mapped[str] = mapped_column(Text, default="")
     expected_impact: Mapped[str] = mapped_column(Text, default="")
+    action_items: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    success_metrics: Mapped[list | None] = mapped_column(JSON, nullable=True)
     confidence: Mapped[float] = mapped_column(Float, default=0.5)
     evidence_refs: Mapped[list | None] = mapped_column(JSON, nullable=True)
     generated_at: Mapped[datetime] = mapped_column(
