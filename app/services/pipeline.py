@@ -12,7 +12,7 @@ from app.services.analyzer import LLMFeedbackAnalyzer
 from app.services.clustering import EmbeddingClusteringService
 from app.services.diagnosis import LLMDiagnosisGenerator
 from app.services.embedding import FastembedEmbeddingProvider
-from app.services.issue_metrics import compute_facts, compute_issue_metrics
+from app.services.issue_metrics import compute_executive_summary, compute_facts, compute_issue_metrics
 from app.services.llm import get_llm
 from app.services.opportunity import LLMOpportunityGenerator
 from app.services.prioritisation import WeightedPrioritisationService
@@ -107,6 +107,7 @@ def run_pipeline() -> dict:
 
     # 6. 组装响应
     texts = {item.id: item.raw_text for item in items}
+    executive_summary = compute_executive_summary(items, ranked, metrics)
 
     def _problem_dict(p, rank=None):
         members = [e.feedback_item_id for e in result.evidence if e.product_problem_id == p.id]
@@ -135,6 +136,7 @@ def run_pipeline() -> dict:
 
     response = {
         "feedback_count": len(items),
+        "executive_summary": executive_summary,
         "problems": [_problem_dict(p, i) for i, p in enumerate(ranked, start=1)],
         "candidates": [_problem_dict(p) for p in result.problems if p.needs_review],
         "opportunity": (

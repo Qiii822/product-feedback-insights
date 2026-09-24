@@ -109,3 +109,71 @@ def compute_facts(problem, metrics: dict) -> list[str]:
     if metrics.get("affected_versions"):
         facts.append(f"版本：{', '.join(metrics['affected_versions'])}")
     return facts
+
+
+def compute_executive_summary(items, ranked, metrics) -> dict:
+    """从全量反馈与已排序问题，计算 PM 首页所需的执行摘要（确定性）。
+
+    返回：total / negative_rate / positive_rate / sentiment_change / emerging / top_issues。
+    """
+    total = len(items)
+    rated = [i for i in items if i.rating is not None]
+    negative = sum(1 for i in rated if i.rating <= 2)
+    positive = sum(1 for i in rated if i.rating >= 4)
+    negative_rate = round(negative / len(rated) * 100, 1) if rated else 0.0
+    positive_rate = round(positive / len(rated) * 100, 1) if rated else 0.0
+
+    # 情绪变化：负评率 近期 vs 早期（按全量时间中位数切分）
+    timestamps = sorted(i.timestamp for i in items if i.timestamp is not None)
+    if timestamps:
+        split = timestamps[len(timestamps) // 2]
+        recent_rated = [i for i in rated if i.timestamp is not None and i.timestamp >= split]
+        earlier_rated = [i for i in rated if i.timestamp is not None and i.timestamp < split]
+        recent_rate = round(sum(1 for i in recent_rated if i.rating <= 2) / len(recent_rated) * 100, 1) if recent_rated else None
+        earlier_rate = round(sum(1 for i in earlier_rated if i.rating <= 2) / len(earlier_rated) * 100, 1) if earlier_rated else None
+    else:
+        recent_rate = earlier_rate = None
+
+    if recent_rate is not None and earlier_rate is not None:
+        change = round(recent_rate - earlier_rate, 1)
+        direction = "worse" if change >= 5 else ("better" if change <= -5 else "stable")
+    else:
+        change, direction = 0.0, "stable"
+
+    emerging = []
+    for i, p in enumerate(ranked, start=1):
+        m = metrics.get(p.id, {})
+        t = m.get("trend", {})
+        if t.get("direction") in ("new", "rising"):
+            emerging.append({
+                "id": p.id,
+                "title": p.title,
+                "rank": i,
+                "direction": t.get("direction"),
+                "growth_pct": t.get("growth_pct", 0.0),
+            })
+
+    top_issues = [
+        {
+            "id": p.id,
+            "title": p.title,
+            "rank": i,
+            "severity": p.severity.value if p.severity else None,
+        }
+        for i, p in enumerate(ranked[:3], start=1)
+    ]
+
+    return {
+        "total": total,
+        "negative_rate": negative_rate,
+        "positive_rate": positive_rate,
+        "rated_count": len(rated),
+        "sentiment_change": {
+            "recent_rate": recent_rate,
+            "earlier_rate": earlier_rate,
+            "change": change,
+            "direction": direction,
+        },
+        "emerging": emerging,
+        "top_issues": top_issues,
+    }

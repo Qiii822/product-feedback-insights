@@ -7,6 +7,7 @@ from app.schemas.feedback import FeedbackItem
 from app.schemas.problem import ProductProblem
 from app.services.issue_metrics import (
     affected_versions,
+    compute_executive_summary,
     compute_facts,
     compute_issue_metrics,
     sentiment_distribution,
@@ -103,3 +104,26 @@ def test_compute_facts_lists_data_backed_facts():
     assert any("负 4" in f for f in facts)
     assert any("ios, android" in f for f in facts)
     assert any("2.1.1" in f for f in facts)
+
+
+def test_compute_executive_summary():
+    items = [
+        _item("a", rating=1, day=1),
+        _item("b", rating=2, day=2),
+        _item("c", rating=5, day=3),
+        _item("d", rating=4, day=4),
+    ]
+    p_new = ProductProblem(id="p1", title="问题A")
+    p_stable = ProductProblem(id="p2", title="问题B")
+    metrics = {
+        "p1": {"trend": {"direction": "new", "growth_pct": 100.0}},
+        "p2": {"trend": {"direction": "stable", "growth_pct": 0.0}},
+    }
+    summary = compute_executive_summary(items, [p_new, p_stable], metrics)
+    assert summary["total"] == 4
+    assert summary["negative_rate"] == 50.0
+    assert summary["positive_rate"] == 50.0
+    assert len(summary["emerging"]) == 1
+    assert summary["emerging"][0]["title"] == "问题A"
+    assert summary["top_issues"][0]["title"] == "问题A"
+    assert summary["sentiment_change"]["direction"] == "better"

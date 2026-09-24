@@ -87,6 +87,7 @@ async function loadFeedback() {
 
 function render(data) {
   renderSummary(data);
+  renderExecutive(data.executive_summary);
   renderOpportunity(data.opportunity);
   renderProblems(data.problems);
   renderCandidates(data.candidates);
@@ -108,6 +109,50 @@ function renderSummary(data) {
   el.innerHTML = cards
     .map((c) => `<div class="stat"><div class="stat-value">${c.value}</div><div class="stat-label">${c.label}</div></div>`)
     .join("") + run;
+}
+
+function renderExecutive(sum) {
+  const el = $("#executive");
+  if (!sum) {
+    el.hidden = true;
+    return;
+  }
+  el.hidden = false;
+  const sc = sum.sentiment_change || {};
+  const changeLabel = { worse: "恶化", better: "改善", stable: "稳定" };
+  const changeValue = sc.direction === "stable"
+    ? "稳定"
+    : `${changeLabel[sc.direction] || sc.direction} ${sc.change > 0 ? "+" : ""}${sc.change}pp`;
+  const stats = [
+    { label: "反馈总数", value: sum.total },
+    { label: "负评率", value: `${sum.negative_rate}%` },
+    { label: "正评率", value: `${sum.positive_rate}%` },
+    { label: "情绪变化", value: changeValue },
+  ];
+  const statHtml = stats
+    .map((s) => `<div class="stat"><div class="stat-value">${s.value}</div><div class="stat-label">${s.label}</div></div>`)
+    .join("");
+
+  const emerging = (sum.emerging || [])
+    .map((e) => `<li><a href="#issue-${e.id}">#${e.rank} ${escapeHtml(e.title)}</a> <span class="badge trend-${e.direction}">${TREND_LABEL[e.direction] || e.direction}${e.direction === "rising" ? ` +${e.growth_pct}%` : ""}</span></li>`)
+    .join("");
+  const top = (sum.top_issues || [])
+    .map((t) => `<li><a href="#issue-${t.id}">#${t.rank} ${escapeHtml(t.title)}</a> <span class="badge category">${t.severity || "?"}</span></li>`)
+    .join("");
+
+  el.innerHTML = `
+    <h2>执行摘要</h2>
+    <div class="summary">${statHtml}</div>
+    <div class="exec-cols">
+      <div class="exec-block">
+        <h3>新兴问题（新增 / 上升）</h3>
+        <ul class="exec-list">${emerging || "<li>暂无</li>"}</ul>
+      </div>
+      <div class="exec-block">
+        <h3>Top 问题（点击查看详情）</h3>
+        <ul class="exec-list">${top || "<li>暂无</li>"}</ul>
+      </div>
+    </div>`;
 }
 
 function renderOpportunity(opp) {
@@ -182,7 +227,7 @@ function problemCard(p) {
       </div>`
     : "";
   return `
-    <div class="card">
+    <div class="card" id="issue-${p.id}">
       <div class="card-head">
         ${p.rank ? `<span class="rank">#${p.rank}</span>` : `<span class="rank review">复核</span>`}
         <h3 class="card-title">${escapeHtml(p.title)}</h3>
