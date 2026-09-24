@@ -22,7 +22,6 @@ from app.schemas.problem import ProductProblem
 from app.services.analyzer import LLMFeedbackAnalyzer
 from app.services.clustering import agglomerative_cluster
 from app.services.embedding import FastembedEmbeddingProvider
-from app.services.llm import FakeLLM
 from app.services.prioritisation import WeightedPrioritisationService
 
 CLUSTER_THRESHOLDS = [0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
@@ -33,8 +32,7 @@ def _histogram(values: list[float]) -> dict:
     return {f"{lo:.1f}-{hi:.1f}": sum(1 for v in values if lo <= v < hi) for lo, hi in buckets}
 
 
-def run_classification(llm=None, model: str = "fake") -> dict:
-    llm = llm or FakeLLM()
+def run_classification(llm, model: str = "fake") -> dict:
     cases = case_loader.load_classification_cases()
     analyzer = LLMFeedbackAnalyzer(llm, model=model, prompt_version="v1")
 
@@ -102,8 +100,7 @@ def run_classification(llm=None, model: str = "fake") -> dict:
     }
 
 
-def run_clustering(llm=None, model: str = "fake") -> dict:
-    llm = llm or FakeLLM()
+def run_clustering(llm, model: str = "fake") -> dict:
     cases = case_loader.load_clustering_cases()
     embedder = FastembedEmbeddingProvider()
     texts = [c["raw_text"] for c in cases]
@@ -175,9 +172,9 @@ def run_prioritisation() -> dict:
     }
 
 
-def run_all() -> dict:
+def run_all(llm, model: str = "fake") -> dict:
     return {
-        "classification": run_classification(),
-        "clustering": run_clustering(),
+        "classification": run_classification(llm, model=model),
+        "clustering": run_clustering(llm, model=model),
         "prioritisation": run_prioritisation(),
     }

@@ -8,7 +8,7 @@ from app.services.clustering import (
     agglomerative_cluster,
     problem_confidence,
 )
-from app.services.llm import FakeLLM
+from tests.fakes import FakeLLM
 
 
 def test_agglomerative_groups_identical_and_flags_singleton():

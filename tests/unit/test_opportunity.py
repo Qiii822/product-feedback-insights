@@ -4,8 +4,8 @@ from app.schemas.enums import PrimaryCategory, Severity
 from app.schemas.evidence import Evidence
 from app.schemas.opportunity import ProductOpportunity
 from app.schemas.problem import ProductProblem
-from app.services.llm import FakeLLM
 from app.services.opportunity import LLMOpportunityGenerator
+from tests.fakes import FakeLLM
 
 
 def _problem():

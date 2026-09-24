@@ -7,7 +7,7 @@ from app.schemas.analysis import FeedbackAnalysis
 from app.schemas.enums import IssueType, PrimaryCategory
 from app.schemas.feedback import FeedbackItem
 from app.services.analyzer import LLMFeedbackAnalyzer
-from app.services.llm import FakeLLM
+from tests.fakes import FakeLLM
 
 
 def test_analyzer_produces_linked_analysis():

@@ -230,3 +230,57 @@
 | failure（Payment page froze 误并入 payment_failed） | ✅ 复现 | ❌ 全阈值消除 |
 
 结论：failure case 消除，precision 0.412→1.0，recall 持平，最优 F1 从 0.85 档（0.667）移到 0.70 档（0.824）。
+
+---
+
+## ADR-022：聚类阈值业务化校准（真实分类 + category-aware）
+
+- **决策**：确认 `clustering_threshold = 0.75` 为生产阈值（不再是 initial heuristic）。
+- **备选方案**：降到 0.65/0.70（更多合并）；升到 0.85/0.90（更多拆分）。
+- **数据**（真实 DeepSeek 分类 + category-aware，18 条聚类评估集）：
+
+  | threshold | precision | recall | F1 | ARI |
+  |-----------|-----------|--------|-----|-----|
+  | 0.65 | 1.0 | 0.8 | 0.8889 | 0.882 |
+  | 0.70 | 1.0 | 0.8 | 0.8889 | 0.882 |
+  | 0.75 | 1.0 | 0.8 | 0.8889 | 0.882 |
+  | 0.80 | 1.0 | 0.6 | 0.75 | 0.737 |
+  | 0.85 | 1.0 | 0.5 | 0.6667 | 0.652 |
+  | 0.90 | 1.0 | 0.2 | 0.3333 | 0.319 |
+
+  `failure_merged`（"Payment page froze." 跨类误合并）在所有阈值下均 `False`——category-aware 已彻底消除该 failure。
+
+- **权衡（false merge vs false split 业务成本）**：
+  - **false merge**（把两个不同问题并成一个）→ 污染 volume/severity，PM 会对着一个"杂糅问题"去调查，**难发现、成本高**。
+  - **false split**（把一个问题拆成几个）→ 视图碎片化、volume 被摊薄，但 PM 可**手动合并**，成本较低。
+  - 因此偏 **precision-over-recall**：在 F1 平坦最优区间 [0.65, 0.75] 内选**上沿 0.75**，为 false merge 留安全边际。
+- **为什么**：0.65–0.75 在评估集上 F1/ARI 完全持平（该区间内没有相似度落在其中的样本对），此时阈值选择应由**业务成本**而非 F1 决定。旧的"0.85 最优"是 embedding-only + FakeLLM 的过时结论，已被 ADR-021 推翻。0.75 恰为当前默认值，故无需改代码，只需把"initial heuristic"升级为"业务校准结论"。
+
+---
+
+## ADR-023：Pipeline 升级为 Product Feedback Intelligence（P1–P5）
+
+- **决策**：在既有"分类 → 聚类 → 排序 → 建议"pipeline 之上，新增五个确定性/LLM 步骤，使输出从"分类标签"升级为 PM 可据以决策的情报：
+  - **P1 置信度校准**：`analyzer` 增加确定性 `needs_review` 触发（confidence < 0.7 强制复核）；`ProductProblem.confidence` 由占位 0.5 改为确定性公式 `0.35 + 0.45·cohesion + 0.15·min(evidence,10)/10`；评估新增 ECE + reliability curve。
+  - **P2 Issue Intelligence**：新增 `issue_metrics.py`（volume_pct / sentiment / affected_versions / trend）。
+  - **P3 可解释排序**：`prioritisation` V3 增加 growth 因子 + `factor_breakdown()`，外显"为什么排这里"。
+  - **P4 诊断**：新增 `Diagnosis` schema（FACT 确定性 / HYPOTHESIS + UNKNOWN 由 LLM，evidence-grounded）。
+  - **P5 执行摘要**：`compute_executive_summary`（负评率 / 情绪变化 / 新兴问题 / top 问题）+ UI 点击下钻。
+- **备选方案**：引入 Agentic loop 重写；或继续只输出分类标签。
+- **权衡**：仍是 pipeline-first（确定性优先，LLM 只在语义理解/生成处使用）；每个新步骤都是确定性聚合或单次 LLM 调用，可单独评估。
+- **为什么**：这些是"把反馈变成 PM 能据此行动的情报"所需的最小增量，且都建立在已有 evidence / timestamp / rating 字段之上，无需改摄取层。
+
+**关键子决策：**
+
+1. **trend** 用"相对全量时间中位数的近期/早期份额"（`growth_norm = recent/(recent+earlier)`），而非固定时间窗——更稳健、无需假设窗口大小。
+2. **诊断只对前 3 个 confirmed 问题生成**（`DIAGNOSIS_TOP_K=3`）：hypotheses/unknowns 是 LLM 调用、按需生成才划算；facts 对每个问题都确定性生成。
+3. **growth 因子权重 1.0**（与 severity/volume 同权），在 `_DEFAULT_WEIGHTS` 中可调。
+
+---
+
+## ADR-024：删除 FakeLLM（生产不再静默回退假输出）
+
+- **决策**：删除 `FakeLLM` / `NullLLM` 及 `get_llm()` 的无 key 回退；`get_llm()` 在未配置 `DEEPSEEK_API_KEY` 时**抛 `LLMProviderError`**。测试所需的 mock 移到 `tests/fakes.py`（测试专用，不进入生产）。
+- **备选方案**：保留 FakeLLM 但标注为 demo 占位；或保留静默回退。
+- **权衡**：删除后，无 key 时 app 明确报错（fail loudly），而不是静默产出假分析；测试仍可用本地 stub 覆盖确定性逻辑。代价是离线 demo 不再可用。
+- **为什么**：FakeLLM 既当测试 mock 又当无 key 的 demo 分类器，导致 demo 输出被误读成"系统真实质量"（历史上 16.67%→88.89% 的关键词启发式都是这个混淆的产物）。分开"测试 mock"与"生产 LLM"两条路径，消除混淆；生产只允许真实 provider，符合"永不静默接受非法输出"原则。

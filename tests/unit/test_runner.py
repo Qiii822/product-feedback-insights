@@ -1,7 +1,7 @@
 """评估 runner 测试：锁定 UI 依赖的评估报告字段契约。"""
 
 from app.evaluation.runner import run_classification
-from app.services.llm import FakeLLM
+from tests.fakes import FakeLLM
 
 
 def test_classification_report_contains_ui_fields():

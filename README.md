@@ -4,7 +4,7 @@
 
 这是一个面向 AI 产品经理（AI PM）的作品集项目。它不仅是"能跑通"，更重要的是展示一套**清晰、可替换、可评估**的 AI 系统架构，以及背后的产品与技术决策。
 
-> 当前状态：**完整 pipeline 已接入真实 DeepSeek 并端到端跑通**，提供**浏览器 UI（dashboard）**与**可观测性**（每次运行记录 run_id / 耗时 / token）。反馈摄取 → 分析 → 聚类 → 排序 → 建议全链路可运行，含评估框架与 78 个单元测试。
+> 当前状态：**Product Feedback Intelligence** —— 在"摄取 → 分析 → 聚类 → 排序 → 建议"基础上，新增 **Issue Intelligence（趋势/情绪/占比/版本）、可解释排序（因子分解）、诊断（FACT/HYPOTHESIS/UNKNOWN）、执行摘要**。已接入真实 DeepSeek 并端到端跑通，提供浏览器 dashboard 与可观测性（run_id / 耗时 / token），含评估框架（分类 / 聚类 / 排序 / 置信度校准）与 101 个单元测试。**运行需要真实 `DEEPSEEK_API_KEY`（未配置即报错，不再回退 mock）。**
 
 ---
 
@@ -21,16 +21,18 @@
 ## 架构概览
 
 ```
-原始反馈 → 反馈理解 → 问题聚类 → 问题验证 → 优先级排序 → 产品机会
+原始反馈 → 反馈理解 → 问题聚类 → Issue Intelligence → 优先级排序 → 诊断 → 产品机会 → 执行摘要
 ```
 
-| 阶段 | 机制（当前 MVP） |
+| 阶段 | 机制（当前） |
 |------|------------------|
 | 反馈理解 | 单次 LLM 调用，结构化输出 |
-| 问题聚类 | 确定性（embedding + 相似度） |
-| 问题验证 | 确定性（cohesion 内聚度 + provisional confidence） |
-| 优先级排序 | 确定性（加权打分） |
+| 问题聚类 | 确定性（embedding + category-aware） |
+| Issue Intelligence | 确定性聚合（趋势 / 情绪 / 占比 / 版本） |
+| 优先级排序 | 确定性加权打分（可分解：严重度 / 量 / 增长 / 广度） |
+| 诊断 | FACT 确定性 + HYPOTHESIS / UNKNOWN 单次 LLM（evidence-grounded） |
 | 产品机会 | 单次 LLM 调用，基于证据生成 |
+| 执行摘要 | 确定性聚合（负评率 / 情绪变化 / 新兴问题） |
 
 详细架构与决策见 [`docs/architecture/architecture.md`](docs/architecture/architecture.md) 与 [`docs/decisions/decision-log.md`](docs/decisions/decision-log.md)。
 
@@ -45,7 +47,7 @@ product-feedback-insights/
 │   ├── core/           # 配置、日志、追踪
 │   ├── db/             # SQLAlchemy engine / session / Base
 │   ├── models/         # ORM 模型
-│   ├── schemas/        # Pydantic 数据契约（5 个核心 schema）
+│   ├── schemas/        # Pydantic 数据契约（schema）
 │   ├── services/       # 业务接口 + LLM 客户端实现
 │   ├── repositories/   # 存储实现
 │   └── static/         # 浏览器 UI（HTML / JS / CSS）
@@ -65,7 +67,7 @@ product-feedback-insights/
 # 1. 安装依赖
 uv sync
 
-# 2. 配置 LLM（可选：不配则回退到 FakeLLM mock）
+# 2. 配置 LLM（必需：未配置则运行时报错，不会静默回退 mock）
 cp .env.example .env
 # 编辑 .env，填入：
 #   DEEPSEEK_API_KEY=sk-你的key
@@ -98,7 +100,7 @@ uv run uvicorn app.main:app --reload
 # 打开 http://127.0.0.1:8000
 ```
 
-UI 支持：上传 CSV/JSON → 摄取（或点「载入示例数据」一键灌入 48 条模拟反馈 `data/raw/mock_feedback.csv`）→ 运行完整分析 → 查看排序后的产品问题、候选问题、证据与 Top 机会建议。
+UI 支持：上传 CSV/JSON → 摄取（或点「载入示例数据」一键灌入 48 条模拟反馈 `data/raw/mock_feedback.csv`）→ 运行完整分析 → 查看**执行摘要**（负评率/情绪变化/新兴问题）、Top 机会建议、按优先级排序的产品问题（趋势/情绪/占比/版本/排序分解/诊断/证据），并可点击摘要中的 issue 下钻到完整 Issue Intelligence。另可「运行分类评估」查看 accuracy / F1 / per-category / reliability curve / needs_review 召回。
 
 ---
 
@@ -110,13 +112,14 @@ UI 支持：上传 CSV/JSON → 摄取（或点「载入示例数据」一键灌
 | `FeedbackAnalysis` | 反馈理解阶段的输出（primary_category / issue_type / severity / confidence / needs_review） |
 | `ProductProblem` | 聚类得到的候选产品问题 |
 | `Evidence` | "某条反馈支撑某问题"的关联，保证可追溯 |
+| `Diagnosis` | 结构化诊断（facts / hypotheses / unknowns），区分事实与假设 |
 | `ProductOpportunity` | 最终建议，强制引用证据（抗幻觉） |
 
 ## 核心接口（`app/services/interfaces.py`）
 
 | 接口 | 替换点 |
 |------|--------|
-| `LLMClient` | LLM 供应商（FakeLLM / DeepSeek） |
+| `LLMClient` | LLM 供应商（DeepSeek） |
 | `EmbeddingProvider` | Embedding（当前 fastembed / Fake） |
 | `FeedbackRepository` | 存储（InMemory / SQL） |
 | `FeedbackAnalyzer` | 反馈理解（LLMFeedbackAnalyzer） |

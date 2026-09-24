@@ -14,7 +14,7 @@ from app.services.interfaces import (
     FeedbackRepository,
     PrioritisationService,
 )
-from app.services.llm import FakeLLM
+from tests.fakes import FakeLLM
 
 
 def test_llm_client_is_abstract():

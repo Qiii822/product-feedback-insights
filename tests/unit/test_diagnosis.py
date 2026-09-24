@@ -4,7 +4,7 @@ from app.schemas.diagnosis import Diagnosis
 from app.schemas.enums import PrimaryCategory, Severity
 from app.schemas.problem import ProductProblem
 from app.services.diagnosis import LLMDiagnosisGenerator
-from app.services.llm import FakeLLM
+from tests.fakes import FakeLLM
 
 
 def _problem():
