@@ -14,6 +14,8 @@ from collections import Counter
 
 _SENTIMENT_BUCKETS = ("negative", "neutral", "positive", "unknown")
 
+_DIRECTION_ZH = {"rising": "上升", "falling": "下降", "stable": "稳定", "new": "新增"}
+
 
 def _sentiment_of(rating) -> str:
     if rating is None:
@@ -86,3 +88,24 @@ def compute_issue_metrics(items, problems, evidence) -> dict[str, dict]:
             "growth_norm": growth_norm,  # 近期份额（0~1），供 prioritisation 的增长因子使用
         }
     return result
+
+
+def compute_facts(problem, metrics: dict) -> list[str]:
+    """从确定性指标推导"事实"（FACT），供诊断输出使用。
+
+    只陈述可直接追溯到数据的事实，不含任何推测或根因判断。
+    """
+    facts = [f"共 {problem.evidence_count} 条反馈，占总反馈 {metrics.get('volume_pct', 0)}%"]
+
+    t = metrics.get("trend", {})
+    direction = _DIRECTION_ZH.get(t.get("direction", "stable"), t.get("direction", "stable"))
+    facts.append(f"趋势 {direction}：近期 {t.get('recent', 0)} 条 / 早期 {t.get('earlier', 0)} 条")
+
+    s = metrics.get("sentiment", {})
+    facts.append(f"情绪：负 {s.get('negative', 0)} · 中 {s.get('neutral', 0)} · 正 {s.get('positive', 0)}")
+
+    if problem.affected_segments:
+        facts.append(f"平台：{', '.join(problem.affected_segments)}")
+    if metrics.get("affected_versions"):
+        facts.append(f"版本：{', '.join(metrics['affected_versions'])}")
+    return facts

@@ -173,6 +173,14 @@ function problemCard(p) {
   const breakdown = factors.length && p.priority_score
     ? `<div class="card-score">为什么排这里：${factors.map((f) => `${FACTOR_LABEL[f.name] || f.name} ${f.contribution.toFixed(2)}`).join(" + ")} = ${p.priority_score.toFixed(2)}</div>`
     : "";
+  const diag = p.diagnosis;
+  const diagHtml = diag
+    ? `<div class="card-diagnosis">
+        ${diag.facts && diag.facts.length ? `<div class="diag-row diag-facts"><span class="diag-label">事实</span><ul>${diag.facts.map((f) => `<li>${escapeHtml(f)}</li>`).join("")}</ul></div>` : ""}
+        ${diag.hypotheses && diag.hypotheses.length ? `<div class="diag-row diag-hypo"><span class="diag-label">假设</span><ul>${diag.hypotheses.map((h) => `<li>${escapeHtml(h)}</li>`).join("")}</ul></div>` : ""}
+        ${diag.unknowns && diag.unknowns.length ? `<div class="diag-row diag-unknown"><span class="diag-label">未知</span><ul>${diag.unknowns.map((u) => `<li>${escapeHtml(u)}</li>`).join("")}</ul></div>` : ""}
+      </div>`
+    : "";
   return `
     <div class="card">
       <div class="card-head">
@@ -192,6 +200,7 @@ function problemCard(p) {
       </div>
       ${sentimentText}
       ${breakdown}
+      ${diagHtml}
       ${evidence.length ? `<div class="evidence-label">证据表现</div><ul class="evidence">${evidence.map((e) => `<li>${escapeHtml(e.text)}${e.count > 1 ? `<span class="count">×${e.count}</span>` : ""}</li>`).join("")}</ul>` : ""}
     </div>`;
 }

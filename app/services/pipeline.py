@@ -10,13 +10,17 @@ from app.repositories.problem import SQLProblemRepository
 from app.repositories.sql import SQLFeedbackRepository
 from app.services.analyzer import LLMFeedbackAnalyzer
 from app.services.clustering import EmbeddingClusteringService
+from app.services.diagnosis import LLMDiagnosisGenerator
 from app.services.embedding import FastembedEmbeddingProvider
-from app.services.issue_metrics import compute_issue_metrics
+from app.services.issue_metrics import compute_facts, compute_issue_metrics
 from app.services.llm import get_llm
 from app.services.opportunity import LLMOpportunityGenerator
 from app.services.prioritisation import WeightedPrioritisationService
 
 logger = logging.getLogger("pipeline")
+
+# 诊断（FACT/HYPOTHESIS/UNKNOWN）生成到前 K 个 confirmed 问题
+DIAGNOSIS_TOP_K = 3
 
 
 def _with_run(response: dict, run_id: str, started: float, llm, model: str) -> dict:
@@ -69,14 +73,30 @@ def run_pipeline() -> dict:
     prioritiser = WeightedPrioritisationService()
     ranked = prioritiser.prioritize(result.problems, growth=growth)
 
-    # 4. 建议（top confirmed）
+    # 4. 建议 + 诊断（top confirmed）
+    texts = {item.id: item.raw_text for item in items}
     opportunity = None
+    diagnoses: dict[str, dict] = {}
     if ranked:
-        texts = {item.id: item.raw_text for item in items}
         generator = LLMOpportunityGenerator(llm)
         top = ranked[0]
         top_evidence = [e for e in result.evidence if e.product_problem_id == top.id]
         opportunity = generator.generate(top, top_evidence, texts)
+
+        # 诊断（FACT 确定性 / HYPOTHESIS + UNKNOWN 由 LLM，evidence-grounded）
+        diagnosis_gen = LLMDiagnosisGenerator(llm)
+        for p in ranked[:DIAGNOSIS_TOP_K]:
+            member_texts = [
+                texts[e.feedback_item_id]
+                for e in result.evidence
+                if e.product_problem_id == p.id and e.feedback_item_id in texts
+            ]
+            d = diagnosis_gen.generate(p, member_texts)
+            diagnoses[p.id] = {
+                "facts": compute_facts(p, metrics[p.id]),
+                "hypotheses": d.hypotheses,
+                "unknowns": d.unknowns,
+            }
 
     # 5. 持久化（清旧 + 存新，避免重复累积）
     problem_repo.clear()
@@ -110,6 +130,7 @@ def run_pipeline() -> dict:
             "affected_versions": m.get("affected_versions", []),
             "trend": m.get("trend", {}),
             "priority_factors": prioritiser.factor_breakdown(p, growth.get(p.id, 0.5)),
+            "diagnosis": diagnoses.get(p.id),
         }
 
     response = {

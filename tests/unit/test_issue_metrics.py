@@ -7,6 +7,7 @@ from app.schemas.feedback import FeedbackItem
 from app.schemas.problem import ProductProblem
 from app.services.issue_metrics import (
     affected_versions,
+    compute_facts,
     compute_issue_metrics,
     sentiment_distribution,
     trend,
@@ -84,3 +85,21 @@ def test_compute_issue_metrics_volume_pct_sentiment_versions():
     assert m["volume_pct"] == 50.0
     assert m["sentiment"]["negative"] == 2
     assert m["affected_versions"] == ["2.1.0"]
+
+
+def test_compute_facts_lists_data_backed_facts():
+    problem = ProductProblem(
+        id="p1", title="支付失败", evidence_count=5, affected_segments=["ios", "android"]
+    )
+    metrics = {
+        "volume_pct": 10.4,
+        "sentiment": {"negative": 4, "neutral": 0, "positive": 1, "unknown": 0},
+        "affected_versions": ["2.1.1"],
+        "trend": {"recent": 5, "earlier": 0, "growth_pct": 100.0, "direction": "new"},
+    }
+    facts = compute_facts(problem, metrics)
+    assert any("共 5 条反馈" in f for f in facts)
+    assert any("新增" in f for f in facts)
+    assert any("负 4" in f for f in facts)
+    assert any("ios, android" in f for f in facts)
+    assert any("2.1.1" in f for f in facts)

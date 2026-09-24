@@ -165,6 +165,14 @@ body {
 .card-desc { font-size: 14px; color: #374151; margin: 8px 0 0; }
 .card-sentiment { font-size: 13px; color: #374151; margin: 6px 0 0; }
 .card-score { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+.card-diagnosis { margin-top: 10px; padding: 10px 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; }
+.diag-row { margin: 4px 0; font-size: 13px; color: #374151; }
+.diag-row ul { margin: 2px 0 0; padding-left: 18px; }
+.diag-row li { margin: 1px 0; }
+.diag-label { display: inline-block; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 4px; padding: 1px 6px; margin-right: 4px; }
+.diag-facts .diag-label { background: #e0f2fe; color: #0369a1; }
+.diag-hypo .diag-label { background: #fef3c7; color: #92400e; }
+.diag-unknown .diag-label { background: #f1f5f9; color: #475569; }
 
 .evidence-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 10px; }
 .evidence { margin: 6px 0 0; padding-left: 18px; font-size: 14px; color: #374151; }

@@ -12,6 +12,7 @@ import time
 from app.core.errors import LLMOutputError, LLMProviderError
 from app.schemas.analysis import FeedbackAnalysis
 from app.schemas.clustering import ClusterNaming
+from app.schemas.diagnosis import Diagnosis
 from app.schemas.enums import IssueType, PrimaryCategory, Severity
 from app.schemas.opportunity import ProductOpportunity
 from app.services.interfaces import LLMClient
@@ -256,6 +257,13 @@ class FakeLLM(LLMClient):
         if output_schema is ClusterNaming:
             category, _, _ = _classify(text)
             return ClusterNaming(title=_CLUSTER_TITLE[category], description=_CLUSTER_DESC[category])
+        if output_schema is Diagnosis:
+            category, _, _ = _classify(text)
+            title = _CLUSTER_TITLE[category]
+            return Diagnosis(
+                hypotheses=[f"可能是「{title}」相关的流程或配置出现了问题"],
+                unknowns=["当前数据无法判断根因在前端、后端还是第三方支付服务"],
+            )
         if output_schema is ProductOpportunity:
             category, _, _ = _classify(text)
             opp = _OPPORTUNITY.get(category, _OPPORTUNITY[PrimaryCategory.PAYMENT_FAILED])
