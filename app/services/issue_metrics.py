@@ -74,11 +74,15 @@ def compute_issue_metrics(items, problems, evidence) -> dict[str, dict]:
     for p in problems:
         member_ids = [e.feedback_item_id for e in evidence if e.product_problem_id == p.id]
         members = [item_by_id[mid] for mid in member_ids if mid in item_by_id]
+        t = trend(members, items)
+        recent, earlier = t["recent"], t["earlier"]
+        growth_norm = round(recent / (recent + earlier), 4) if (recent + earlier) else 0.5
         result[p.id] = {
             "volume": len(members),
             "volume_pct": round(len(members) / total * 100, 1) if total else 0.0,
             "sentiment": sentiment_distribution(members),
             "affected_versions": affected_versions(members),
-            "trend": trend(members, items),
+            "trend": t,
+            "growth_norm": growth_norm,  # 近期份额（0~1），供 prioritisation 的增长因子使用
         }
     return result

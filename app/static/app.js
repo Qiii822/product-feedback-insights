@@ -2,6 +2,7 @@ const $ = (sel) => document.querySelector(sel);
 
 const SEVERITY_LABEL = { low: "低", medium: "中", high: "高", critical: "严重" };
 const TREND_LABEL = { rising: "上升", falling: "下降", stable: "稳定", new: "新增" };
+const FACTOR_LABEL = { severity: "严重度", volume: "量", growth: "增长", breadth: "广度" };
 
 function setStatus(msg, isError = false, loading = false) {
   const el = $("#status");
@@ -168,6 +169,10 @@ function problemCard(p) {
   const versions = p.affected_versions && p.affected_versions.length
     ? `<span>版本 ${p.affected_versions.join(", ")}</span>`
     : "";
+  const factors = p.priority_factors || [];
+  const breakdown = factors.length && p.priority_score
+    ? `<div class="card-score">为什么排这里：${factors.map((f) => `${FACTOR_LABEL[f.name] || f.name} ${f.contribution.toFixed(2)}`).join(" + ")} = ${p.priority_score.toFixed(2)}</div>`
+    : "";
   return `
     <div class="card">
       <div class="card-head">
@@ -186,6 +191,7 @@ function problemCard(p) {
         ${versions}
       </div>
       ${sentimentText}
+      ${breakdown}
       ${evidence.length ? `<div class="evidence-label">证据表现</div><ul class="evidence">${evidence.map((e) => `<li>${escapeHtml(e.text)}${e.count > 1 ? `<span class="count">×${e.count}</span>` : ""}</li>`).join("")}</ul>` : ""}
     </div>`;
 }

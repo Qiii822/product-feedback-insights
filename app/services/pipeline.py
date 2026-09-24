@@ -63,8 +63,11 @@ def run_pipeline() -> dict:
     clustering = EmbeddingClusteringService(embedder, llm, threshold=settings.clustering_threshold)
     result = clustering.cluster(items, analyses)
 
-    # 3. 排序（只排 confirmed）
-    ranked = WeightedPrioritisationService().prioritize(result.problems)
+    # 3. 排序（只排 confirmed；含增长因子的可解释打分）
+    metrics = compute_issue_metrics(items, result.problems, result.evidence)
+    growth = {pid: m["growth_norm"] for pid, m in metrics.items()}
+    prioritiser = WeightedPrioritisationService()
+    ranked = prioritiser.prioritize(result.problems, growth=growth)
 
     # 4. 建议（top confirmed）
     opportunity = None
@@ -84,7 +87,6 @@ def run_pipeline() -> dict:
 
     # 6. 组装响应
     texts = {item.id: item.raw_text for item in items}
-    metrics = compute_issue_metrics(items, result.problems, result.evidence)
 
     def _problem_dict(p, rank=None):
         members = [e.feedback_item_id for e in result.evidence if e.product_problem_id == p.id]
@@ -107,6 +109,7 @@ def run_pipeline() -> dict:
             "sentiment": m.get("sentiment", {}),
             "affected_versions": m.get("affected_versions", []),
             "trend": m.get("trend", {}),
+            "priority_factors": prioritiser.factor_breakdown(p, growth.get(p.id, 0.5)),
         }
 
     response = {

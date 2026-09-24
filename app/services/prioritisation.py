@@ -1,17 +1,17 @@
 """优先级排序（prioritisation）：问题列表 → 按优先级排序。
 
-决策（Phase 5 V2）：确定性加权打分，透明可解释，权重可配置。
+决策（Phase 5 V3）：确定性加权打分，透明、可解释、可分解。
 
-score = w_severity·severity_norm + w_frequency·frequency_norm + w_breadth·breadth_norm
+score = Σ weightᵢ · normalizedᵢ，因子：
+- severity 严重度（序数 / 4）
+- volume   量（min(证据数, 10) / 10）
+- growth   增长（近期份额 recent/(recent+earlier)，来自 Issue Intelligence 的 trend）
+- breadth  广度（min(受影响平台数, 3) / 3）
 
-- severity_norm = 严重程度序数 / 4（low=1 … critical=4）
-- frequency_norm = min(证据数, 10) / 10
-- breadth_norm = min(受影响平台数, 3) / 3
+factor_breakdown() 返回每个因子的 name / weight / normalized / contribution，
+让 PM 能回答"为什么排在这里"。growth 缺省 0.5（无时间数据时中性）。
 
-V2 移除了 impact = severity × frequency 项：它与 severity / frequency 项重复计算，
-会让高频问题虚高（evaluation 证实导致 ranking 与 PM 判断不一致）。
-
-只对 confirmed（needs_review=False）问题打分排序；candidate 不进入 ranking。
+只对 confirmed（needs_review=False）打分排序；candidate 不进入 ranking。
 """
 
 from app.schemas.enums import ProblemStatus, Severity
@@ -27,36 +27,65 @@ _SEVERITY_RANK = {
 
 _DEFAULT_WEIGHTS = {
     "severity": 1.0,
-    "frequency": 1.0,
+    "volume": 1.0,
+    "growth": 1.0,
     "breadth": 0.5,
 }
 
 
+def _severity_norm(severity) -> float:
+    return _SEVERITY_RANK.get(severity, 0) / 4.0
+
+
+def _volume_norm(evidence_count: int) -> float:
+    return min(evidence_count, 10) / 10.0
+
+
+def _breadth_norm(affected_segments: list) -> float:
+    return min(len(affected_segments), 3) / 3.0
+
+
+def _growth_norm(growth: float) -> float:
+    return max(0.0, min(1.0, growth))
+
+
 class WeightedPrioritisationService(PrioritisationService):
-    """确定性加权优先级排序。"""
+    """确定性加权优先级排序（V3：含 growth 因子，可分解、可解释）。"""
 
     def __init__(self, weights: dict[str, float] | None = None) -> None:
         self._weights = weights or _DEFAULT_WEIGHTS
 
-    def score(self, problem: ProductProblem) -> float:
-        severity = _SEVERITY_RANK.get(problem.severity, 0)
-        frequency = problem.evidence_count
-        breadth = len(problem.affected_segments)
+    def factor_breakdown(self, problem: ProductProblem, growth: float = 0.5) -> list[dict]:
+        """返回每个因子的 name / weight / normalized / contribution（用于解释排序）。"""
+        norms = {
+            "severity": _severity_norm(problem.severity),
+            "volume": _volume_norm(problem.evidence_count),
+            "growth": _growth_norm(growth),
+            "breadth": _breadth_norm(problem.affected_segments),
+        }
+        factors = []
+        for name, norm in norms.items():
+            w = self._weights.get(name, 0.0)
+            factors.append(
+                {
+                    "name": name,
+                    "weight": w,
+                    "normalized": round(norm, 4),
+                    "contribution": round(w * norm, 4),
+                }
+            )
+        return factors
 
-        severity_norm = severity / 4.0
-        frequency_norm = min(frequency, 10) / 10.0
-        breadth_norm = min(breadth, 3) / 3.0
+    def score(self, problem: ProductProblem, growth: float = 0.5) -> float:
+        return round(sum(f["contribution"] for f in self.factor_breakdown(problem, growth)), 4)
 
-        return (
-            self._weights["severity"] * severity_norm
-            + self._weights["frequency"] * frequency_norm
-            + self._weights["breadth"] * breadth_norm
-        )
-
-    def prioritize(self, problems: list[ProductProblem]) -> list[ProductProblem]:
-        """只对 confirmed 问题打分并降序排序；candidate 不进入 ranking。"""
+    def prioritize(
+        self, problems: list[ProductProblem], growth: dict[str, float] | None = None
+    ) -> list[ProductProblem]:
+        """只对 confirmed 问题打分并降序排序；growth 按 problem.id 查（缺省 0.5）。"""
+        growth = growth or {}
         confirmed = [p for p in problems if not p.needs_review]
         for p in confirmed:
-            p.priority_score = round(self.score(p), 4)
+            p.priority_score = self.score(p, growth.get(p.id, 0.5))
             p.status = ProblemStatus.PRIORITIZED
         return sorted(confirmed, key=lambda p: p.priority_score, reverse=True)

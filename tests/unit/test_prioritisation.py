@@ -1,5 +1,7 @@
 """优先级排序测试。"""
 
+import pytest
+
 from app.schemas.enums import PrimaryCategory, ProblemStatus, Severity
 from app.schemas.problem import ProductProblem
 from app.services.prioritisation import WeightedPrioritisationService
@@ -40,3 +42,19 @@ def test_prioritize_ranks_confirmed_descending_and_excludes_candidates():
     assert len(ranked) == 2  # 只排 confirmed
     assert ranked[0].priority_score >= ranked[1].priority_score
     assert ranked[0].status is ProblemStatus.PRIORITIZED
+
+
+def test_factor_breakdown_sums_to_score():
+    svc = WeightedPrioritisationService()
+    p = _problem(5, Severity.CRITICAL)
+    factors = svc.factor_breakdown(p, growth=0.6)
+    assert [f["name"] for f in factors] == ["severity", "volume", "growth", "breadth"]
+    total = sum(f["contribution"] for f in factors)
+    assert total == pytest.approx(svc.score(p, growth=0.6))
+
+
+def test_growth_factor_raises_score():
+    svc = WeightedPrioritisationService()
+    p = _problem(5, Severity.HIGH)
+    assert svc.score(p, growth=0.9) > svc.score(p, growth=0.1)
+
