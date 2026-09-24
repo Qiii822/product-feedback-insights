@@ -11,6 +11,7 @@ from app.repositories.sql import SQLFeedbackRepository
 from app.services.analyzer import LLMFeedbackAnalyzer
 from app.services.clustering import EmbeddingClusteringService
 from app.services.embedding import FastembedEmbeddingProvider
+from app.services.issue_metrics import compute_issue_metrics
 from app.services.llm import get_llm
 from app.services.opportunity import LLMOpportunityGenerator
 from app.services.prioritisation import WeightedPrioritisationService
@@ -83,9 +84,11 @@ def run_pipeline() -> dict:
 
     # 6. 组装响应
     texts = {item.id: item.raw_text for item in items}
+    metrics = compute_issue_metrics(items, result.problems, result.evidence)
 
     def _problem_dict(p, rank=None):
         members = [e.feedback_item_id for e in result.evidence if e.product_problem_id == p.id]
+        m = metrics.get(p.id, {})
         return {
             "id": p.id,
             "title": p.title,
@@ -100,6 +103,10 @@ def run_pipeline() -> dict:
             "priority_score": p.priority_score,
             "rank": rank,
             "evidence": [texts[m] for m in members if m in texts],
+            "volume_pct": m.get("volume_pct", 0.0),
+            "sentiment": m.get("sentiment", {}),
+            "affected_versions": m.get("affected_versions", []),
+            "trend": m.get("trend", {}),
         }
 
     response = {

@@ -1,6 +1,7 @@
 const $ = (sel) => document.querySelector(sel);
 
 const SEVERITY_LABEL = { low: "低", medium: "中", high: "高", critical: "严重" };
+const TREND_LABEL = { rising: "上升", falling: "下降", stable: "稳定", new: "新增" };
 
 function setStatus(msg, isError = false, loading = false) {
   const el = $("#status");
@@ -155,6 +156,18 @@ function renderCandidates(candidates) {
 function problemCard(p) {
   const sev = p.severity || "unknown";
   const evidence = countEvidence(p.evidence || []);
+  const trend = p.trend || {};
+  const trendBadge = trend.direction
+    ? `<span class="badge trend-${trend.direction}">${TREND_LABEL[trend.direction] || trend.direction}${trend.direction === "rising" || trend.direction === "falling" ? ` ${trend.growth_pct > 0 ? "+" : ""}${trend.growth_pct}%` : ""}</span>`
+    : "";
+  const s = p.sentiment || {};
+  const rated = s.negative + s.neutral + s.positive;
+  const sentimentText = rated
+    ? `<div class="card-sentiment">情绪：负 ${s.negative} · 中 ${s.neutral} · 正 ${s.positive}${s.unknown ? ` · 未知 ${s.unknown}` : ""}</div>`
+    : "";
+  const versions = p.affected_versions && p.affected_versions.length
+    ? `<span>版本 ${p.affected_versions.join(", ")}</span>`
+    : "";
   return `
     <div class="card">
       <div class="card-head">
@@ -162,14 +175,17 @@ function problemCard(p) {
         <h3 class="card-title">${escapeHtml(p.title)}</h3>
         <span class="badge severity-${sev}">${SEVERITY_LABEL[sev] || sev}</span>
         <span class="badge category">${p.category || "?"}</span>
+        ${trendBadge}
       </div>
       ${p.description ? `<p class="card-desc">${escapeHtml(p.description)}</p>` : ""}
       <div class="card-meta">
-        <span>证据 ${p.evidence_count} 条</span>
+        <span>证据 ${p.evidence_count} 条 · 占比 ${p.volume_pct != null ? p.volume_pct : "—"}%</span>
         <span>cohesion ${p.cohesion.toFixed(2)}</span>
         ${p.priority_score ? `<span>score ${p.priority_score.toFixed(3)}</span>` : ""}
         ${p.affected_segments && p.affected_segments.length ? `<span>平台 ${p.affected_segments.join(", ")}</span>` : ""}
+        ${versions}
       </div>
+      ${sentimentText}
       ${evidence.length ? `<div class="evidence-label">证据表现</div><ul class="evidence">${evidence.map((e) => `<li>${escapeHtml(e.text)}${e.count > 1 ? `<span class="count">×${e.count}</span>` : ""}</li>`).join("")}</ul>` : ""}
     </div>`;
 }
