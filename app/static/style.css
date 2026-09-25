@@ -151,7 +151,10 @@ body {
 .rank.review { background: #f59e0b; }
 .card-title { margin: 0; font-size: 17px; flex: 1; }
 .badge { font-size: 12px; padding: 2px 8px; border-radius: 6px; font-weight: 600; }
-.badge.category { background: #f1f5f9; color: #475569; }
+.badge.cat-payment { background: #e0f2fe; color: #0369a1; }
+.badge.cat-checkout { background: #ede9fe; color: #6d28d9; }
+.badge.cat-billing { background: #fee2e2; color: #b91c1c; }
+.badge.cat-other { background: #f1f5f9; color: #475569; }
 .severity-low { background: #dcfce7; color: #15803d; }
 .severity-medium { background: #fef9c3; color: #a16207; }
 .severity-high { background: #ffedd5; color: #c2410c; }
@@ -164,7 +167,14 @@ body {
 
 .card-meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin: 8px 0; }
 .card-desc { font-size: 14px; color: #374151; margin: 8px 0 0; }
-.card-sentiment { font-size: 13px; color: #374151; margin: 6px 0 0; }
+.card-sentiment { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #374151; margin: 6px 0 0; }
+.sent-label { color: var(--muted); }
+.sent-bar { display: inline-flex; width: 120px; height: 8px; border-radius: 4px; overflow: hidden; background: #e5e7eb; flex-shrink: 0; }
+.sent-bar > span { display: inline-block; height: 100%; }
+.sent-neg { background: #ef4444; }
+.sent-neu { background: #f59e0b; }
+.sent-pos { background: #22c55e; }
+.sent-counts { color: #374151; }
 .card-score { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
 .card-diagnosis { margin-top: 10px; padding: 10px 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; }
 .diag-row { margin: 4px 0; font-size: 13px; color: #374151; }
@@ -238,3 +248,19 @@ body {
 .exec-list li { margin: 4px 0; }
 .exec-list a { color: var(--accent); text-decoration: none; }
 .exec-list a:hover { text-decoration: underline; }
+
+/* Top-3 强调 */
+.card.top { border-color: var(--accent); box-shadow: 0 1px 6px rgba(79, 70, 229, 0.12); }
+
+/* 卡片渐进展开 */
+.card-details { margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 8px; }
+.card-details summary { cursor: pointer; font-size: 13px; color: var(--accent); font-weight: 600; }
+.detail-line { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+
+/* 候选问题紧凑列表 */
+.candidate-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; margin-bottom: 6px; }
+.cand-title { font-weight: 600; white-space: nowrap; }
+.cand-text { color: var(--muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 执行摘要 meta 行 */
+.exec-meta { font-size: 12px; color: var(--muted); margin: 8px 0 4px; }

@@ -3,6 +3,27 @@ const $ = (sel) => document.querySelector(sel);
 const SEVERITY_LABEL = { low: "低", medium: "中", high: "高", critical: "严重" };
 const TREND_LABEL = { rising: "上升", falling: "下降", stable: "稳定", new: "新增" };
 const FACTOR_LABEL = { severity: "严重度", volume: "量", growth: "增长", breadth: "广度" };
+const CATEGORY_LABEL = {
+  payment_declined: "银行卡被拒",
+  payment_failed: "支付失败",
+  payment_timeout: "支付超时",
+  payment_method_missing: "缺少支付方式",
+  payment_method_not_working: "支付方式不可用",
+  checkout_stuck: "收银台卡住",
+  checkout_crash: "收银台崩溃",
+  checkout_performance: "收银台性能",
+  duplicate_charge: "重复扣费",
+  incorrect_charge: "错误扣费",
+  other: "其他",
+};
+
+function categoryClass(cat) {
+  if (!cat) return "other";
+  if (cat.startsWith("payment")) return "payment";
+  if (cat.startsWith("checkout")) return "checkout";
+  if (cat === "duplicate_charge" || cat === "incorrect_charge") return "billing";
+  return "other";
+}
 
 function setStatus(msg, isError = false, loading = false) {
   const el = $("#status");
@@ -86,33 +107,16 @@ async function loadFeedback() {
 }
 
 function render(data) {
-  renderSummary(data);
-  renderExecutive(data.executive_summary);
-  renderOpportunity(data.opportunity);
+  renderExecutive(data);
+  renderOpportunity(data.opportunity, data.problems[0]);
   renderProblems(data.problems);
   renderCandidates(data.candidates);
   if (data.feedback_count) loadFeedback();
 }
 
-function renderSummary(data) {
-  const cards = [
-    { label: "反馈总数", value: data.feedback_count },
-    { label: "已确认问题", value: data.problems.length },
-    { label: "候选问题", value: data.candidates.length },
-    { label: "other（不参与聚类）", value: `${data.other.count}（${data.other.percentage.toFixed(1)}%）` },
-  ];
-  const el = $("#summary");
-  el.hidden = false;
-  const run = data.run
-    ? `<div class="run-info">run ${data.run.run_id.slice(0, 8)} · ${data.run.latency_ms}ms · ${data.run.total_tokens} tokens · ${data.run.model}</div>`
-    : "";
-  el.innerHTML = cards
-    .map((c) => `<div class="stat"><div class="stat-value">${c.value}</div><div class="stat-label">${c.label}</div></div>`)
-    .join("") + run;
-}
-
-function renderExecutive(sum) {
+function renderExecutive(data) {
   const el = $("#executive");
+  const sum = data.executive_summary;
   if (!sum) {
     el.hidden = true;
     return;
@@ -137,12 +141,21 @@ function renderExecutive(sum) {
     .map((e) => `<li><a href="#issue-${e.id}">#${e.rank} ${escapeHtml(e.title)}</a> <span class="badge trend-${e.direction}">${TREND_LABEL[e.direction] || e.direction}${e.direction === "rising" ? ` +${e.growth_pct}%` : ""}</span></li>`)
     .join("");
   const top = (sum.top_issues || [])
-    .map((t) => `<li><a href="#issue-${t.id}">#${t.rank} ${escapeHtml(t.title)}</a> <span class="badge category">${t.severity || "?"}</span></li>`)
+    .map((t) => `<li><a href="#issue-${t.id}">#${t.rank} ${escapeHtml(t.title)}</a> <span class="badge severity-${t.severity || "unknown"}">${SEVERITY_LABEL[t.severity] || t.severity || "?"}</span></li>`)
     .join("");
+
+  const metaParts = [
+    `已确认问题 ${data.problems.length}`,
+    `候选问题 ${data.candidates.length}`,
+    `other ${data.other.percentage.toFixed(1)}%`,
+  ];
+  if (data.run) metaParts.push(`run ${data.run.run_id.slice(0, 8)} · ${(data.run.latency_ms / 1000).toFixed(1)}s · ${data.run.total_tokens} tokens · ${data.run.model}`);
+  const metaLine = metaParts.join(" · ");
 
   el.innerHTML = `
     <h2>执行摘要</h2>
     <div class="summary">${statHtml}</div>
+    <div class="exec-meta">${metaLine}</div>
     <div class="exec-cols">
       <div class="exec-block">
         <h3>新兴问题（新增 / 上升）</h3>
@@ -155,13 +168,16 @@ function renderExecutive(sum) {
     </div>`;
 }
 
-function renderOpportunity(opp) {
+function renderOpportunity(opp, topProblem) {
   const el = $("#opportunity");
   if (!opp) {
     el.hidden = true;
     return;
   }
   el.hidden = false;
+  const topRef = topProblem
+    ? ` · 针对 <a href="#issue-${topProblem.id}">#1 ${escapeHtml(topProblem.title)}</a>`
+    : "";
   const steps = opp.action_items && opp.action_items.length
     ? `<div class="opp-block"><h4>建议步骤</h4><ol class="opp-list">${opp.action_items.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ol></div>`
     : "";
@@ -169,7 +185,7 @@ function renderOpportunity(opp) {
     ? `<div class="opp-block"><h4>如何验证</h4><ul class="opp-list">${opp.success_metrics.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ul></div>`
     : "";
   el.innerHTML = `
-    <div class="opp-title">💡 Top 产品机会</div>
+    <div class="opp-title">💡 Top 产品机会${topRef}</div>
     <h3>${escapeHtml(opp.title)}</h3>
     ${opp.summary ? `<p class="opp-summary">${escapeHtml(opp.summary)}</p>` : ""}
     <div class="opp-reco">${escapeHtml(opp.recommendation)}</div>
@@ -186,6 +202,7 @@ function renderProblems(problems) {
     return;
   }
   section.hidden = false;
+  document.querySelector("#problems h2").textContent = `已确认的产品问题（按优先级排序，共 ${problems.length} 个）`;
   $("#problemList").innerHTML = problems.map(problemCard).join("");
 }
 
@@ -196,11 +213,13 @@ function renderCandidates(candidates) {
     return;
   }
   section.hidden = false;
-  $("#candidateList").innerHTML = candidates.map(problemCard).join("");
+  document.querySelector("#candidates h2").textContent = `候选问题（需人工复核，共 ${candidates.length} 个）`;
+  $("#candidateList").innerHTML = candidates.map(candidateRow).join("");
 }
 
 function problemCard(p) {
   const sev = p.severity || "unknown";
+  const cat = p.category || "other";
   const evidence = countEvidence(p.evidence || []);
   const trend = p.trend || {};
   const trendBadge = trend.direction
@@ -208,15 +227,18 @@ function problemCard(p) {
     : "";
   const s = p.sentiment || {};
   const rated = s.negative + s.neutral + s.positive;
-  const sentimentText = rated
-    ? `<div class="card-sentiment">情绪：负 ${s.negative} · 中 ${s.neutral} · 正 ${s.positive}${s.unknown ? ` · 未知 ${s.unknown}` : ""}</div>`
+  const negPct = rated ? (s.negative / rated) * 100 : 0;
+  const neuPct = rated ? (s.neutral / rated) * 100 : 0;
+  const posPct = rated ? (s.positive / rated) * 100 : 0;
+  const sentimentBar = rated
+    ? `<div class="card-sentiment"><span class="sent-label">情绪</span><span class="sent-bar"><span class="sent-neg" style="width:${negPct}%"></span><span class="sent-neu" style="width:${neuPct}%"></span><span class="sent-pos" style="width:${posPct}%"></span></span><span class="sent-counts">负 ${s.negative} · 中 ${s.neutral} · 正 ${s.positive}${s.unknown ? ` · 未知 ${s.unknown}` : ""}</span></div>`
     : "";
   const versions = p.affected_versions && p.affected_versions.length
     ? `<span>版本 ${p.affected_versions.join(", ")}</span>`
     : "";
   const factors = p.priority_factors || [];
   const breakdown = factors.length && p.priority_score
-    ? `<div class="card-score">为什么排这里：${factors.map((f) => `${FACTOR_LABEL[f.name] || f.name} ${f.contribution.toFixed(2)}`).join(" + ")} = ${p.priority_score.toFixed(2)}</div>`
+    ? `<div class="card-score">优先级 ${p.priority_score.toFixed(2)} = ${factors.map((f) => `${FACTOR_LABEL[f.name] || f.name} ${f.contribution.toFixed(2)}`).join(" + ")}</div>`
     : "";
   const diag = p.diagnosis;
   const diagHtml = diag
@@ -226,27 +248,49 @@ function problemCard(p) {
         ${diag.unknowns && diag.unknowns.length ? `<div class="diag-row diag-unknown"><span class="diag-label">未知</span><ul>${diag.unknowns.map((u) => `<li>${escapeHtml(u)}</li>`).join("")}</ul></div>` : ""}
       </div>`
     : "";
+  const evidenceHtml = evidence.length
+    ? `<div class="evidence-label">证据表现</div><ul class="evidence">${evidence.map((e) => `<li>${escapeHtml(e.text)}${e.count > 1 ? `<span class="count">×${e.count}</span>` : ""}</li>`).join("")}</ul>`
+    : "";
+  const detailContent = [
+    `<div class="detail-line">内聚度 ${p.cohesion.toFixed(2)}</div>`,
+    diagHtml,
+    evidenceHtml,
+  ].filter(Boolean).join("");
+  const detailsHtml = detailContent
+    ? `<details class="card-details"><summary>诊断与证据（点击展开）</summary>${detailContent}</details>`
+    : "";
+
   return `
-    <div class="card" id="issue-${p.id}">
+    <div class="card${p.rank && p.rank <= 3 ? " top" : ""}" id="issue-${p.id}">
       <div class="card-head">
         ${p.rank ? `<span class="rank">#${p.rank}</span>` : `<span class="rank review">复核</span>`}
         <h3 class="card-title">${escapeHtml(p.title)}</h3>
         <span class="badge severity-${sev}">${SEVERITY_LABEL[sev] || sev}</span>
-        <span class="badge category">${p.category || "?"}</span>
+        <span class="badge cat-${categoryClass(cat)}">${CATEGORY_LABEL[cat] || cat}</span>
         ${trendBadge}
       </div>
       ${p.description ? `<p class="card-desc">${escapeHtml(p.description)}</p>` : ""}
       <div class="card-meta">
         <span>证据 ${p.evidence_count} 条 · 占比 ${p.volume_pct != null ? p.volume_pct : "—"}%</span>
-        <span>cohesion ${p.cohesion.toFixed(2)}</span>
-        ${p.priority_score ? `<span>score ${p.priority_score.toFixed(3)}</span>` : ""}
         ${p.affected_segments && p.affected_segments.length ? `<span>平台 ${p.affected_segments.join(", ")}</span>` : ""}
         ${versions}
       </div>
-      ${sentimentText}
+      ${sentimentBar}
       ${breakdown}
-      ${diagHtml}
-      ${evidence.length ? `<div class="evidence-label">证据表现</div><ul class="evidence">${evidence.map((e) => `<li>${escapeHtml(e.text)}${e.count > 1 ? `<span class="count">×${e.count}</span>` : ""}</li>`).join("")}</ul>` : ""}
+      ${detailsHtml}
+    </div>`;
+}
+
+function candidateRow(p) {
+  const sev = p.severity || "unknown";
+  const cat = p.category || "other";
+  const text = p.evidence && p.evidence[0] ? p.evidence[0] : "";
+  return `
+    <div class="candidate-row" id="issue-${p.id}">
+      <span class="cand-title">${escapeHtml(p.title)}</span>
+      <span class="badge cat-${categoryClass(cat)}">${CATEGORY_LABEL[cat] || cat}</span>
+      <span class="badge severity-${sev}">${SEVERITY_LABEL[sev] || sev}</span>
+      ${text ? `<span class="cand-text" title="${escapeHtml(text)}">${escapeHtml(text)}</span>` : ""}
     </div>`;
 }
 
@@ -297,7 +341,7 @@ function renderQuality(r) {
   const rows = Object.entries(r.per_category)
     .map(([cat, prf]) => {
       const [p, rec, f1] = prf;
-      return `<tr><td>${cat}</td><td>${p.toFixed(2)}</td><td>${rec.toFixed(2)}</td><td>${f1.toFixed(2)}</td></tr>`;
+      return `<tr><td>${CATEGORY_LABEL[cat] || cat}</td><td>${p.toFixed(2)}</td><td>${rec.toFixed(2)}</td><td>${f1.toFixed(2)}</td></tr>`;
     })
     .join("");
 
