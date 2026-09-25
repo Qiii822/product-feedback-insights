@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Feedback Insights — 把客户反馈变成产品洞察</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f3ff;
+      --card: #ffffff;
+      --text: #1e1b4b;
+      --muted: #475569;
+      --border: #e0e7ff;
+      --accent: #6366f1;
+      --accent-dark: #4f46e5;
+      --success: #059669;
+      --success-dark: #047857;
+      --radius: 16px;
+      --shadow-sm: 0 1px 2px rgba(30,27,75,.06);
+      --shadow-md: 0 8px 28px rgba(30,27,75,.10);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Fira Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+    /* Nav */
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; color: var(--text); }
+    .brand .logo {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      display: inline-flex; align-items: center; justify-content: center; color: #fff;
+    }
+    .nav-links { display: flex; gap: 28px; align-items: center; font-size: 14px; }
+    .nav-links a { color: var(--muted); }
+    .nav-links a:hover { color: var(--text); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 20px; min-height: 44px; border-radius: 10px;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s;
+      border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--success); color: #fff; }
+    .btn-primary:hover { background: var(--success-dark); }
+    .btn-ghost { background: #fff; border-color: var(--border); color: var(--text); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Hero */
+    .hero { text-align: center; padding: 72px 0 56px; }
+    .eyebrow {
+      display: inline-block; font-size: 13px; font-weight: 600; color: var(--accent);
+      background: #eef2ff; border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px; margin-bottom: 20px;
+    }
+    .hero h1 { font-size: 46px; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 18px; }
+    .hero h1 .grad {
+      background: linear-gradient(90deg, var(--accent), #8b5cf6);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero p.lead { font-size: 18px; color: var(--muted); max-width: 640px; margin: 0 auto 30px; }
+    .hero .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .hero-stats { display: flex; gap: 40px; justify-content: center; margin-top: 48px; flex-wrap: wrap; }
+    .hero-stats .stat { text-align: center; }
+    .hero-stats .num { font-size: 30px; font-weight: 700; color: var(--accent); }
+    .hero-stats .lbl { font-size: 13px; color: var(--muted); }
+
+    /* Section */
+    section { padding: 56px 0; }
+    .sec-head { text-align: center; max-width: 620px; margin: 0 auto 40px; }
+    .sec-head h2 { font-size: 30px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 12px; }
+    .sec-head p { color: var(--muted); font-size: 16px; margin: 0; }
+
+    /* Features */
+    .features { background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; box-shadow: var(--shadow-sm); transition: box-shadow .2s, transform .2s;
+    }
+    .card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .card .icon {
+      width: 44px; height: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;
+      background: #eef2ff; color: var(--accent); margin-bottom: 16px;
+    }
+    .card h3 { font-size: 17px; margin: 0 0 8px; }
+    .card p { font-size: 14px; color: var(--muted); margin: 0; }
+
+    /* Pipeline */
+    .pipeline { background: var(--bg); }
+    .pipe {
+      display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+      font-size: 13px; font-weight: 600;
+    }
+    .pipe .step {
+      background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 8px 16px; box-shadow: var(--shadow-sm);
+    }
+    .pipe .arrow { color: var(--accent); }
+
+    /* Questions */
+    .questions { background: #fff; border-top: 1px solid var(--border); }
+    .qlist { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .qitem { display: flex; align-items: center; gap: 12px; background: #fafaff; border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; font-size: 15px; }
+    .qitem .tick { color: var(--success); font-weight: 700; }
+
+    /* CTA */
+    .cta { text-align: center; }
+    .cta-box {
+      background: linear-gradient(135deg, #3730a3 0%, #4f46e5 55%, #6366f1 100%);
+      border-radius: 20px; padding: 56px 32px; color: #fff; box-shadow: var(--shadow-md);
+    }
+    .cta-box h2 { font-size: 30px; margin: 0 0 14px; }
+    .cta-box p { opacity: .85; font-size: 16px; margin: 0 0 26px; }
+    .cta-box .btn-primary { background: var(--success); }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--border); padding: 28px 0 40px; color: var(--muted); font-size: 13px; }
+    .foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+    @media (max-width: 800px) {
+      .grid { grid-template-columns: 1fr; }
+      .qlist { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 34px; }
+      .nav-links { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="nav">
+      <a class="brand" href="/landing"><span class="logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 13l3-3 3 3 5-6"/></svg>
+      </span>Product Feedback Insights</a>
+      <div class="nav-links">
+        <a href="#features">功能</a>
+        <a href="#pipeline">工作原理</a>
+        <a href="#questions">回答什么</a>
+        <a class="btn btn-primary" href="/">打开控制台</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <span class="eyebrow">面向产品经理的反馈情报工具</span>
+      <h1>把海量客户反馈，<br>变成<span class="grad">可行动的产品洞察</span></h1>
+      <p class="lead">从非结构化反馈中自动挖掘问题、追踪趋势、诊断根因、给出优先级——每一条结论都有证据支撑，而不是 AI 的一拍脑袋。</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="/">打开控制台</a>
+        <a class="btn btn-ghost" href="#features">了解功能</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="num">11 类</div><div class="lbl">问题分类</div></div>
+        <div class="stat"><div class="num">5 阶段</div><div class="lbl">确定性流水线</div></div>
+        <div class="stat"><div class="num">100%</div><div class="lbl">证据可追溯</div></div>
+      </div>
+    </header>
+  </div>
+
+  <section class="features" id="features">
+    <div class="container">
+      <div class="sec-head">
+        <h2>一个工具，回答 PM 真正关心的问题</h2>
+        <p>不再是孤立的分类标签，而是从原始反馈到可行动建议的完整情报链路。</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 13l3-3 3 3 5-6"/></svg></span>
+          <h3>Issue Intelligence</h3>
+          <p>每个问题的反馈量、占比、情绪分布、趋势（上升/下降/新增）、受影响平台与版本，一眼看清全貌。</p>
+        </div>
+        <div class="card">
+          <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></span>
+          <h3>可解释的优先级排序</h3>
+          <p>排序不是黑盒分数——严重度、量、增长、广度四个因子逐一分解，清清楚楚告诉你"为什么排这里"。</p>
+        </div>
+        <div class="card">
+          <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+          <h3>结构化诊断</h3>
+          <p>区分事实（FACT）、假设（HYPOTHESIS）、未知（UNKNOWN），不把 AI 的猜测伪装成事实。</p>
+        </div>
+        <div class="card">
+          <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span>
+          <h3>执行摘要</h3>
+          <p>负评率、情绪变化、新兴问题、Top 问题——30 秒掌握全局，点击即可下钻到完整详情。</p>
+        </div>
+        <div class="card">
+          <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <h3>证据支撑的建议</h3>
+          <p>每个高优先级问题自动生成可执行的修复步骤与验证指标，且强制引用来源反馈。</p>
+        </div>
+        <div class="card">
+          <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+          <h3>可评估的质量</h3>
+          <p>内置评估框架：分类准确率、每类 F1、置信度校准曲线、needs_review 召回，让你知道自己该信多少。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pipeline" id="pipeline">
+    <div class="container">
+      <div class="sec-head">
+        <h2>从原始反馈到产品建议</h2>
+        <p>确定性优先：能用软件解决的绝不用大模型，LLM 只在语义理解处出现。</p>
+      </div>
+      <div class="pipe">
+        <span class="step">原始反馈</span><span class="arrow">→</span>
+        <span class="step">分类</span><span class="arrow">→</span>
+        <span class="step">情绪</span><span class="arrow">→</span>
+        <span class="step">聚类</span><span class="arrow">→</span>
+        <span class="step">优先级</span><span class="arrow">→</span>
+        <span class="step">诊断</span><span class="arrow">→</span>
+        <span class="step">建议</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="questions" id="questions">
+    <div class="container">
+      <div class="sec-head">
+        <h2>它替你回答这 8 个问题</h2>
+      </div>
+      <div class="qlist">
+        <div class="qitem"><span class="tick">✓</span>用户在抱怨什么？</div>
+        <div class="qitem"><span class="tick">✓</span>哪些问题最严重？</div>
+        <div class="qitem"><span class="tick">✓</span>哪些问题正在快速恶化？</div>
+        <div class="qitem"><span class="tick">✓</span>每个问题影响了多少用户？</div>
+        <div class="qitem"><span class="tick">✓</span>问题发生在哪个平台、版本？</div>
+        <div class="qitem"><span class="tick">✓</span>用户为什么不满？</div>
+        <div class="qitem"><span class="tick">✓</span>我为什么应该相信这个结论？</div>
+        <div class="qitem"><span class="tick">✓</span>下一步该调查或做什么？</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <div class="cta-box">
+        <h2>开始把反馈变成洞察</h2>
+        <p>载入示例数据，30 秒看到一份完整的反馈情报报告。</p>
+        <a class="btn btn-primary" href="/">打开控制台 →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container foot">
+      <span>Product Feedback Insights · 把客户反馈转化为有证据支撑的产品洞察</span>
+      <span>确定性优先 · 证据可追溯 · LLM 只在语义处使用</span>
+    </div>
+  </footer>
+</body>
+</html>

@@ -38,6 +38,10 @@ def create_app() -> FastAPI:
     def index():
         return FileResponse(STATIC_DIR / "index.html")
 
+    @app.get("/landing")
+    def landing():
+        return FileResponse(STATIC_DIR / "landing.html")
+
     return app
 
 
