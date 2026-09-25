@@ -1,5 +1,9 @@
 const $ = (sel) => document.querySelector(sel);
 
+// 内联 SVG 图标（替代 emoji：跨平台一致、可用 design token 控制颜色）
+const ICON_BULB = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15 14c.2-1 .7-1.7 1.5-2.5C17.5 10.6 18 9.3 18 8a6 6 0 0 0-12 0c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/></svg>';
+const ICON_WARN = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 20h16a2 2 0 0 0 1.73-2Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
+
 const SEVERITY_LABEL = { low: "低", medium: "中", high: "高", critical: "严重" };
 const TREND_LABEL = { rising: "上升", falling: "下降", stable: "稳定", new: "新增" };
 const FACTOR_LABEL = { severity: "严重度", volume: "量", growth: "增长", breadth: "广度" };
@@ -31,7 +35,7 @@ function setStatus(msg, isError = false, loading = false) {
   el.className = "status" + (isError ? " error" : "") + (loading ? " loading" : "");
   const banner = $("#errorBanner");
   banner.hidden = !isError;
-  if (isError) banner.textContent = "⚠️ " + msg;
+  if (isError) banner.innerHTML = `${ICON_WARN} ${escapeHtml(msg)}`;
 }
 
 async function postJSON(url, body) {
@@ -185,7 +189,7 @@ function renderOpportunity(opp, topProblem) {
     ? `<div class="opp-block"><h4>如何验证</h4><ul class="opp-list">${opp.success_metrics.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ul></div>`
     : "";
   el.innerHTML = `
-    <div class="opp-title">💡 Top 产品机会${topRef}</div>
+    <div class="opp-title">${ICON_BULB} Top 产品机会${topRef}</div>
     <h3>${escapeHtml(opp.title)}</h3>
     ${opp.summary ? `<p class="opp-summary">${escapeHtml(opp.summary)}</p>` : ""}
     <div class="opp-reco">${escapeHtml(opp.recommendation)}</div>
