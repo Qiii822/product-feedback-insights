@@ -1,0 +1,604 @@
+{
+ "cases": [
+  {
+   "id": "t001",
+   "raw_text": "Venmo support when?? Asking for the 5th time",
+   "intent_category": "payment_method_missing",
+   "intent_issue_type": "request"
+  },
+  {
+   "id": "t002",
+   "raw_text": "gateway timeout 504 when paying. Pixel 8, v5.1",
+   "intent_category": "payment_timeout",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t003",
+   "raw_text": "Please change my delivery address on order 7781, I moved",
+   "intent_category": "other",
+   "intent_issue_type": "request"
+  },
+  {
+   "id": "t004",
+   "raw_text": "was charged in USD instead of CAD, conversion fees ate me alive",
+   "intent_category": "incorrect_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t005",
+   "raw_text": "I was billed $89.00 but my cart total was $59.00. Where did the extra $30 come from?",
+   "intent_category": "duplicate_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t006",
+   "raw_text": "Tax was added twice on my order I think. total is way more than the summary",
+   "intent_category": "incorrect_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t007",
+   "raw_text": "took forever and then 'The request took too long'. tried 3 times. gave up and went to a competitor",
+   "intent_category": "payment_timeout",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t008",
+   "raw_text": "Refund still hasn't hit my account after 3 weeks. Ticket #44102",
+   "intent_category": "other",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t009",
+   "raw_text": "why was i charged $4.99 shipping when the banner says free shipping over $35? my order was $47",
+   "intent_category": "incorrect_charge",
+   "intent_issue_type": "question"
+  },
+  {
+   "id": "t010",
+   "raw_text": "Error from bank: do not honor. $64.99 for annual plan. Wells Fargo says nothing on their end. so annoying",
+   "intent_category": "payment_declined",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t011",
+   "raw_text": "timeout error at the payment step at around 9pm EST both nights, maybe your servers get slammed?",
+   "intent_category": "payment_timeout",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t012",
+   "raw_text": "my chase card got turned down at checkout. called them and they said they blocked it as suspicious?? its my own card, been using it for years. tried again, same thing",
+   "intent_category": "payment_declined",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t013",
+   "raw_text": "checkout takes SO long. like 40 seconds between each screen but it does go through eventually",
+   "intent_category": "checkout_crash",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t014",
+   "raw_text": "duplicate billing on my subscription renewal, March 3rd. Both $9.99. My bank shows both posted.",
+   "intent_category": "duplicate_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t015",
+   "raw_text": "Payment session expired while waiting for my bank's 3DS page to come back. Frustrating!!!",
+   "intent_category": "payment_timeout",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t016",
+   "raw_text": "the Continue button is permanently disabled on address page even tho all fields are filled in. Cant proceed to payment.",
+   "intent_category": "checkout_stuck",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t017",
+   "raw_text": "PLEASE add PayPal!!! I don't want to type my card into every app. Half my friends said the same",
+   "intent_category": "payment_timeout",
+   "intent_issue_type": "request"
+  },
+  {
+   "id": "t018",
+   "raw_text": "checkout page just spins forever. Been on 'Processing your order...' for 10 minutes",
+   "intent_category": "payment_method_not_working",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t019",
+   "raw_text": "Charged twice for the same item. I know pending ones fall off but this one has been 5 days.",
+   "intent_category": "duplicate_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t020",
+   "raw_text": "Charged full price even though I applied the 20% code and it showed the discount at checkout",
+   "intent_category": "incorrect_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t021",
+   "raw_text": "Checkout is frozen on the shipping step, can't tap anything. Tried logging out/in.",
+   "intent_category": "checkout_stuck",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t022",
+   "raw_text": "card declined. insufficient funds it says but I literally have $800 in there. wtf",
+   "intent_category": "payment_declined",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t023",
+   "raw_text": "Page stuck at 99% after entering 3D secure code",
+   "intent_category": "checkout_stuck",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t024",
+   "raw_text": "gift card code won't apply as payment, says invalid even though balance is $50 per the email",
+   "intent_category": "payment_method_not_working",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t025",
+   "raw_text": "ur payment system is broken. Sorry I just wanna buy my sub. system error system error system error",
+   "intent_category": "payment_failed",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t026",
+   "raw_text": "so I fill out everything, hit continue and it just sits there. no progress. 1 hour. gonna cancel my sub",
+   "intent_category": "checkout_stuck",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t027",
+   "raw_text": "payment errored out. internal server error on the confirm screen. pls fix",
+   "intent_category": "payment_failed",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t028",
+   "raw_text": "no way to pay by debit card with PIN or cash on delivery. Thats a dealbreaker for me tbh",
+   "intent_category": "payment_method_missing",
+   "intent_issue_type": "feedback"
+  },
+  {
+   "id": "t029",
+   "raw_text": "Would love better error messages than 'Oops'. I have no idea if it's me or you. Payment just fails w/ generic glitch",
+   "intent_category": "payment_failed",
+   "intent_issue_type": "feedback"
+  },
+  {
+   "id": "t030",
+   "raw_text": "How do I cancel my subscription? Can't find the button anywhere in settings",
+   "intent_category": "other",
+   "intent_issue_type": "question"
+  },
+  {
+   "id": "t031",
+   "raw_text": "Can you speed up checkout? Takes like 8 taps and each one lags on my old iPhone 8",
+   "intent_category": "checkout_performance",
+   "intent_issue_type": "request"
+  },
+  {
+   "id": "t032",
+   "raw_text": "I got charged twice for the same order! $39.99 x2 on my Citi statement. Order #88213",
+   "intent_category": "checkout_performance",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t033",
+   "raw_text": "Why can I not select Apple Pay as payment? Button is disabled. Is it because of my region (Canada)?",
+   "intent_category": "payment_method_not_working",
+   "intent_issue_type": "question"
+  },
+  {
+   "id": "t034",
+   "raw_text": "lol the app just dies when I scan my card with the camera. NullPointer or something",
+   "intent_category": "checkout_crash",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t035",
+   "raw_text": "love the app! just wish the dark mode was darker",
+   "intent_category": "other",
+   "intent_issue_type": "feedback"
+  },
+  {
+   "id": "t036",
+   "raw_text": "Customer support chat never replies. Been waiting 2 days. Not about payment, just general.",
+   "intent_category": "other",
+   "intent_issue_type": "feedback"
+  },
+  {
+   "id": "t037",
+   "raw_text": "it works but it's sluggish af. animation stutters during the payment form",
+   "intent_category": "checkout_performance",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t038",
+   "raw_text": "worst app ever. waste of time",
+   "intent_category": "other",
+   "intent_issue_type": "feedback"
+  },
+  {
+   "id": "t039",
+   "raw_text": "the app quits randomly during payment. Not sure if it was charged. Checked bank, no.",
+   "intent_category": "checkout_crash",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t040",
+   "raw_text": "there's only credit card as an option. in Germany nobody uses cc, we need SEPA or Giropay",
+   "intent_category": "payment_method_missing",
+   "intent_issue_type": "request"
+  },
+  {
+   "id": "t041",
+   "raw_text": "Connection timeout on payment every single time on mobile data. Works on wifi sometimes. Please look into it",
+   "intent_category": "payment_timeout",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t042",
+   "raw_text": "Need a refund for my order, it arrived broken.",
+   "intent_category": "incorrect_charge",
+   "intent_issue_type": "request"
+  },
+  {
+   "id": "t043",
+   "raw_text": "not offering Alipay or WeChat pay is hurting you with international students",
+   "intent_category": "payment_method_missing",
+   "intent_issue_type": "feedback"
+  },
+  {
+   "id": "t044",
+   "raw_text": "Crash on apple pay sheet dismiss. Version 5.0.2. Pls hotfix.",
+   "intent_category": "checkout_crash",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t045",
+   "raw_text": "Would be great to be able to use Google Pay. I only see Visa/Mastercard",
+   "intent_category": "payment_method_missing",
+   "intent_issue_type": "request"
+  },
+  {
+   "id": "t046",
+   "raw_text": "Hey team, is there an outage? Can't complete any purchase, the app shows 'Payment could not be completed (E-221)'. Not a bank thing, I checked.",
+   "intent_category": "payment_failed",
+   "intent_issue_type": "question"
+  },
+  {
+   "id": "t047",
+   "raw_text": "Not terrible but the final confirmation step is slow, around 20-30s. Other apps do it instantly",
+   "intent_category": "checkout_performance",
+   "intent_issue_type": "feedback"
+  },
+  {
+   "id": "t048",
+   "raw_text": "Why does my Barclays card keep getting refused? Works everywhere else. Please tell me how to fix this",
+   "intent_category": "payment_declined",
+   "intent_issue_type": "question"
+  },
+  {
+   "id": "t049",
+   "raw_text": "Keeps crashing when I try to subscribe to premium. Opens the payment sheet then boom, gone.",
+   "intent_category": "checkout_crash",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t050",
+   "raw_text": "Wrong amount taken, 150 instead of 105 I think a typo in your system? Order 55120",
+   "intent_category": "incorrect_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t051",
+   "raw_text": "stuck on the review order screen. Place Order button does nothing, no error",
+   "intent_category": "checkout_stuck",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t052",
+   "raw_text": "Laggy payment page. Typing in the card number has a delay of a couple sec. works but painful",
+   "intent_category": "checkout_performance",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t053",
+   "raw_text": "Bug report: crash on tap 'Confirm purchase'. Stack trace attached in email. Android 14, Pixel 6a",
+   "intent_category": "checkout_crash",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t054",
+   "raw_text": "Can you increase the payment timeout window? I'm in rural area w/ bad signal, it always expires before it finishes",
+   "intent_category": "payment_timeout",
+   "intent_issue_type": "request"
+  },
+  {
+   "id": "t055",
+   "raw_text": "hello?? anyone there. I need help with my account",
+   "intent_category": "other",
+   "intent_issue_type": "request"
+  },
+  {
+   "id": "t056",
+   "raw_text": "Google Pay greyed out at checkout since last update (6.2.0). Reinstalled twice.",
+   "intent_category": "payment_method_not_working",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t057",
+   "raw_text": "Apple Pay button is there but tapping does nothing. Wallet has 2 cards set up. iPhone 13, iOS 17.",
+   "intent_category": "payment_method_not_working",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t058",
+   "raw_text": "Is it normal that checkout takes over a minute? Eventually it finished fine, just curious",
+   "intent_category": "checkout_performance",
+   "intent_issue_type": "question"
+  },
+  {
+   "id": "t059",
+   "raw_text": "pls explain why there are 2 pending charges of $12.50 for one order",
+   "intent_category": "duplicate_charge",
+   "intent_issue_type": "question"
+  },
+  {
+   "id": "t060",
+   "raw_text": "they charged me for premium annual when I picked monthly. $119.99 vs $11.99!!",
+   "intent_category": "incorrect_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t061",
+   "raw_text": "Tried to add new debit card, form keeps clearing every time I tab to CVV. unusable on Android 13",
+   "intent_category": "payment_method_not_working",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t062",
+   "raw_text": "Is the checkout page supposed to hang after selecting delivery option? Asking before I contact support again",
+   "intent_category": "checkout_stuck",
+   "intent_issue_type": "question"
+  },
+  {
+   "id": "t063",
+   "raw_text": "I added my Visa but when I press Pay it says the card type isn't supported. wont let me select it at all, greyed out",
+   "intent_category": "payment_method_missing",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t064",
+   "raw_text": "My saved card is stuck 'unavailable' even tho expiry is 2028. Can't remove it either.",
+   "intent_category": "payment_method_not_working",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t065",
+   "raw_text": "Please add protection against double taps on the pay button, got billed twice for $120",
+   "intent_category": "duplicate_charge",
+   "intent_issue_type": "request"
+  },
+  {
+   "id": "t066",
+   "raw_text": "Spinner for like 2 minutes then 'request timed out'. Wifi is great, speedtest 300mbps",
+   "intent_category": "payment_timeout",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t067",
+   "raw_text": "shipping took 3 weeks lol. also the box was crushed",
+   "intent_category": "other",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t068",
+   "raw_text": "PayPal won't link. It opens the login then comes back to the app with 'unable to connect account'",
+   "intent_category": "payment_method_not_working",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t069",
+   "raw_text": "tried paying with apple pay, 'processing error' then back to cart. happened 4x today",
+   "intent_category": "payment_failed",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t070",
+   "raw_text": "Transaction not approved by my bank (Santander). Would be nice if the app told me WHY instead of just a red banner",
+   "intent_category": "payment_declined",
+   "intent_issue_type": "feedback"
+  },
+  {
+   "id": "t071",
+   "raw_text": "I can't log in after resetting my password, the email never arrives",
+   "intent_category": "other",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t072",
+   "raw_text": "Can you add a wishlist feature so I can save things for later?",
+   "intent_category": "other",
+   "intent_issue_type": "request"
+  },
+  {
+   "id": "t073",
+   "raw_text": "something's wrong with my order",
+   "intent_category": "other",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t074",
+   "raw_text": "two receipts emailed, two debits. Only ordered one pair of sneakers. Come on",
+   "intent_category": "duplicate_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t075",
+   "raw_text": "Wish you supported Klarna or Afterpay, $240 is a lot upfront",
+   "intent_category": "payment_method_missing",
+   "intent_issue_type": "request"
+  },
+  {
+   "id": "t076",
+   "raw_text": "Tokenization error pops up at the last step. Happens only since the update to 3.8.0. Samsung S22.",
+   "intent_category": "payment_failed",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t077",
+   "raw_text": "tapped pay once, got charged 3 times. my account is now overdrawn thanks to you",
+   "intent_category": "duplicate_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t078",
+   "raw_text": "where is my package? It says delivered but I never got it",
+   "intent_category": "other",
+   "intent_issue_type": "question"
+  },
+  {
+   "id": "t079",
+   "raw_text": "crashes at checkout every. single. time. iPhone 12, iOS 17.5, version 4.9",
+   "intent_category": "checkout_crash",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t080",
+   "raw_text": "DOUBLE CHARGED. Two identical transactions for my monthly plan, same minute. Refund one now!!!",
+   "intent_category": "duplicate_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t081",
+   "raw_text": "my card was charged for the trial I cancelled. 14.99. Cancelled 2 days before the end.",
+   "intent_category": "incorrect_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t082",
+   "raw_text": "Where's the option to pay with UPI? I'm in India, can't use the app without it",
+   "intent_category": "payment_method_missing",
+   "intent_issue_type": "question"
+  },
+  {
+   "id": "t083",
+   "raw_text": "Please add a way to retry with a different card after a bank rejection without rebuilding my whole cart, losing 20 items each time is painful",
+   "intent_category": "payment_declined",
+   "intent_issue_type": "request"
+  },
+  {
+   "id": "t084",
+   "raw_text": "App crashed as soon as I tapped Pay. Closed to home screen. Did it 3 times",
+   "intent_category": "checkout_stuck",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t085",
+   "raw_text": "force close when entering CVV on my Galaxy A52. Please fix, I've lost my cart like 5 times",
+   "intent_category": "checkout_crash",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t086",
+   "raw_text": "Got a 500 error when I tapped Pay Now. Money didnt leave my account thankfully",
+   "intent_category": "payment_failed",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t087",
+   "raw_text": "issuer rejected the txn twice, got a text from my bank asking if I tried to buy something and I said YES and it still bounced",
+   "intent_category": "payment_declined",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t088",
+   "raw_text": "No Apple Pay option on the iPhone app but the website has it. Why?",
+   "intent_category": "payment_method_missing",
+   "intent_issue_type": "question"
+  },
+  {
+   "id": "t089",
+   "raw_text": "Order did go through but the order summary screen took forever to load, almost closed the app",
+   "intent_category": "checkout_performance",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t090",
+   "raw_text": "declined declined declined. 3 different cards. is my account flagged or something",
+   "intent_category": "payment_declined",
+   "intent_issue_type": "question"
+  },
+  {
+   "id": "t091",
+   "raw_text": "saw two charges after the first attempt errored. so it errored AND charged? And then I retried and got charged again",
+   "intent_category": "duplicate_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t092",
+   "raw_text": "loading wheel never ends after I enter the promo code. Have to kill the app",
+   "intent_category": "checkout_stuck",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t093",
+   "raw_text": "the payment gateway seems to be down?? 'Unable to process request' for the last 2 days on iOS 17.4",
+   "intent_category": "payment_failed",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t094",
+   "raw_text": "Great app but checkout slows down hard when my cart has more than 10 items. Finishes in the end.",
+   "intent_category": "checkout_performance",
+   "intent_issue_type": "feedback"
+  },
+  {
+   "id": "t095",
+   "raw_text": "Tried to pay and got 'something went wrong, please try again later' with error code 5003. Three times now. Card is fine, I used it at Target an hour ago.",
+   "intent_category": "payment_failed",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t096",
+   "raw_text": "Fraud filter on your side or mine?? every attempt w/ my amex gets 'declined by card issuer'. v4.12.1 on pixel 7",
+   "intent_category": "payment_declined",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t097",
+   "raw_text": "billing me for 3 items, I only bought 2. one is a phone case I removed from cart",
+   "intent_category": "incorrect_charge",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t098",
+   "raw_text": "Infinite loop: payment page redirects back to cart, then to payment, then to cart. Safari on iPad",
+   "intent_category": "checkout_stuck",
+   "intent_issue_type": "problem"
+  },
+  {
+   "id": "t099",
+   "raw_text": "payment timed out after I hit confirm. Was I charged?? no idea",
+   "intent_category": "payment_timeout",
+   "intent_issue_type": "question"
+  },
+  {
+   "id": "t100",
+   "raw_text": "can't use my Discover card, the number field rejects it after 15 digits",
+   "intent_category": "payment_method_not_working",
+   "intent_issue_type": "problem"
+  }
+ ]
+}

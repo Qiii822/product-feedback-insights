@@ -32,8 +32,8 @@ def _histogram(values: list[float]) -> dict:
     return {f"{lo:.1f}-{hi:.1f}": sum(1 for v in values if lo <= v < hi) for lo, hi in buckets}
 
 
-def run_classification(llm, model: str = "fake") -> dict:
-    cases = case_loader.load_classification_cases()
+def run_classification(llm, model: str = "fake", split: str = "dev") -> dict:
+    cases = case_loader.load_classification_cases(split)
     analyzer = LLMFeedbackAnalyzer(llm, model=model, prompt_version="v1")
 
     true_cat, pred_cat = [], []
@@ -74,6 +74,7 @@ def run_classification(llm, model: str = "fake") -> dict:
     return {
         "n": len(cases),
         "model": model,
+        "split": split,
         "accuracy": round(accuracy(true_cat, pred_cat), 4),
         "macro_f1": round(macro_f1(true_cat, pred_cat, labels), 4),
         "issue_type_accuracy": round(accuracy(true_it, pred_it), 4),

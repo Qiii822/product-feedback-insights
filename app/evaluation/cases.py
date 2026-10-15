@@ -14,8 +14,18 @@ def _load(name: str) -> dict:
         return json.load(f)
 
 
-def load_classification_cases() -> list[dict]:
-    return _load("cases_classification.json")["cases"]
+CLASSIFICATION_SPLITS = {
+    # dev：用于 prompt 迭代，指标是"调参成绩"
+    "dev": "cases_classification.json",
+    # test：留出集，只用于报告泛化指标，禁止据其失败样例改 prompt（见 ADR）
+    "test": "cases_classification_test.json",
+}
+
+
+def load_classification_cases(split: str = "dev") -> list[dict]:
+    if split not in CLASSIFICATION_SPLITS:
+        raise ValueError(f"unknown split: {split!r}（可选：{sorted(CLASSIFICATION_SPLITS)}）")
+    return _load(CLASSIFICATION_SPLITS[split])["cases"]
 
 
 def load_clustering_cases() -> list[dict]:
