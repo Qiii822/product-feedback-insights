@@ -310,13 +310,20 @@ function countEvidence(texts) {
 async function handleEvaluate() {
   const btn = $("#evalBtn");
   const status = $("#evalStatus");
+  const split = $("#evalSplit").value;
   btn.disabled = true;
-  status.textContent = "正在运行分类评估（真实 LLM 约 30~60 秒）…";
+  status.textContent = `正在运行分类评估（${split} · 真实 LLM 约 30~60 秒）…`;
   status.className = "status loading";
   try {
-    const data = await postJSON("/api/evaluate", {});
+    const data = await postJSON(`/api/evaluate?split=${encodeURIComponent(split)}`, {});
+    if (data.available === false) {
+      renderPending(data);
+      status.textContent = `${data.split} 留出集尚未标注`;
+      status.className = "status";
+      return;
+    }
     renderQuality(data);
-    status.textContent = `评估完成 · model ${data.model} · ${data.n} 条用例`;
+    status.textContent = `评估完成 · split ${data.split} · model ${data.model} · ${data.n} 条用例`;
     status.className = "status";
   } catch (e) {
     status.textContent = "评估失败：" + e.message;
@@ -324,6 +331,24 @@ async function handleEvaluate() {
   } finally {
     btn.disabled = false;
   }
+}
+
+function renderPending(p) {
+  const el = $("#qualityResult");
+  el.hidden = false;
+  const pending = p.pending || {};
+  el.innerHTML = `
+    <div class="q-pending">
+      <div class="q-pending-title">${ICON_WARN} ${escapeHtml(p.split)} 留出集待人工盲标</div>
+      <p class="q-note">${escapeHtml(p.reason || "")}</p>
+      <div class="summary">
+        <div class="stat"><div class="stat-value">${pending.labeled || 0}</div><div class="stat-label">已标注</div></div>
+        <div class="stat"><div class="stat-value">${pending.unlabeled || 0}</div><div class="stat-label">待标注</div></div>
+      </div>
+      <p class="q-note">标注表 <code>${escapeHtml(pending.sheet || "")}</code><br>
+        标完后运行 <code>${escapeHtml(pending.build_command || "")}</code> 写出测试集。
+        dev 集已饱和（accuracy 100%），泛化成绩只能来自这一集。</p>
+    </div>`;
 }
 
 function renderQuality(r) {
@@ -365,7 +390,12 @@ function renderQuality(r) {
     })
     .join("");
 
+  const splitNote = r.split === "dev"
+    ? `<p class="q-note q-caveat">这是 <strong>dev 调参集</strong>：prompt 与分类词表就是照着这 ${r.n} 条调出来的，指标已饱和，<strong>不代表泛化能力</strong>。要看真实成绩请切换到 test（留出集）。</p>`
+    : `<p class="q-note">这是 <strong>test 留出集</strong>成绩，只用于报告泛化能力——其失败样例不得用于改 prompt（否则它就退化成第二个 dev 集）。</p>`;
+
   el.innerHTML = `
+    <div class="q-head"><span class="badge badge-split">split ${escapeHtml(r.split || "?")}</span>${splitNote}</div>
     <div class="summary">${statHtml}</div>
     <div class="q-block">
       <h3>每类表现（precision / recall / F1）</h3>

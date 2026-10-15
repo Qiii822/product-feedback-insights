@@ -3,12 +3,14 @@
 import os
 import tempfile
 from pathlib import Path
+from typing import Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from app.core.config import settings
 from app.db.session import SessionLocal
+from app.evaluation.cases import split_status
 from app.evaluation.runner import run_classification
 from app.repositories.problem import SQLProblemRepository
 from app.repositories.sql import SQLFeedbackRepository
@@ -70,12 +72,28 @@ def run():
 
 
 @router.post("/evaluate")
-def evaluate():
-    """运行分类评估（ground-truth 手标集），返回 accuracy / F1 / per-category / reliability / needs_review 等指标。"""
+def evaluate(split: Literal["dev", "test"] = Query("dev")):
+    """运行分类评估，返回 accuracy / F1 / per-category / reliability / needs_review 等指标。
+
+    - split=dev：调参集（prompt 就是照着它调的，指标已饱和，仅作回归信号）。
+    - split=test：留出集，用于报告泛化指标。该集需人工盲标后才存在；缺失时
+      返回 `available=false` 的「待标注」占位，而不是报错。
+
+    可用性检查刻意排在 `get_llm()` **之前**：留出集没标注这件事不需要（也不应）
+    触碰 LLM——否则未配置 API key 时，连"还没标注"都看不到。
+    """
+    status = split_status(split)
+    if not status["available"]:
+        return {
+            "split": split,
+            "available": False,
+            "reason": f"留出集尚未标注：评估集 {status['source']} 不存在",
+            "pending": status["pending"],
+        }
     try:
         llm = get_llm()
         model = settings.deepseek_model if settings.deepseek_api_key else "fake"
-        return run_classification(llm, model=model)
+        return {**run_classification(llm, model=model, split=split), "available": True}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"评估失败：{exc}") from exc
 

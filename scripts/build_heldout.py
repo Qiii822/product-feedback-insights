@@ -12,10 +12,10 @@ import csv
 import json
 from datetime import date
 
-from app.evaluation.cases import DATA_DIR
+from app.evaluation.cases import DATA_DIR, HELDOUT_DIR
 from app.schemas.enums import IssueType, PrimaryCategory
 
-HELDOUT = DATA_DIR / "heldout"
+HELDOUT = HELDOUT_DIR
 
 
 def main() -> int:

@@ -4,7 +4,7 @@
 
 这是一个面向 AI 产品经理（AI PM）的作品集项目。它不仅是"能跑通"，更重要的是展示一套**清晰、可替换、可评估**的 AI 系统架构，以及背后的产品与技术决策。
 
-> 当前状态：**Product Feedback Intelligence** —— 在"摄取 → 分析 → 聚类 → 排序 → 建议"基础上，新增 **Issue Intelligence（趋势/情绪/占比/版本）、可解释排序（因子分解）、诊断（FACT/HYPOTHESIS/UNKNOWN）、执行摘要**。已接入真实 DeepSeek 并端到端跑通，提供浏览器 dashboard 与可观测性（run_id / 耗时 / token），含评估框架（分类 / 聚类 / 排序 / 置信度校准）与 101 个单元测试。**运行需要真实 `DEEPSEEK_API_KEY`（未配置即报错，不再回退 mock）。**
+> 当前状态：**Product Feedback Intelligence** —— 在"摄取 → 分析 → 聚类 → 排序 → 建议"基础上，新增 **Issue Intelligence（趋势/情绪/占比/版本）、可解释排序（因子分解）、诊断（FACT/HYPOTHESIS/UNKNOWN）、执行摘要**。已接入真实 DeepSeek 并端到端跑通，提供浏览器 dashboard 与可观测性（run_id / 耗时 / token），含评估框架（分类 / 聚类 / 排序 / 置信度校准）与 107 个单元测试（其中 2 个依赖留出集标注，未标注时跳过）。**运行需要真实 `DEEPSEEK_API_KEY`（未配置即报错，不再回退 mock）。**
 
 ---
 
@@ -82,7 +82,8 @@ uv run python -m scripts.cluster
 uv run python -m scripts.prioritize
 
 # 5. 运行评估（真实 DeepSeek 分类评估 / 全量 baseline）
-uv run python -m scripts.evaluate_deepseek
+uv run python -m scripts.evaluate_deepseek              # dev 集 = 调参成绩
+uv run python -m scripts.evaluate_deepseek --split test # test 集 = 泛化成绩（需先盲标留出集）
 uv run python -m scripts.evaluate
 
 # 6. 运行单元测试
@@ -101,6 +102,8 @@ uv run uvicorn app.main:app --reload
 ```
 
 UI 支持：上传 CSV/JSON → 摄取（或点「载入示例数据」一键灌入 48 条模拟反馈 `data/raw/mock_feedback.csv`）→ 运行完整分析 → 查看**执行摘要**（负评率/情绪变化/新兴问题）、Top 机会建议、按优先级排序的产品问题（趋势/情绪/占比/版本/排序分解/诊断/证据），并可点击摘要中的 issue 下钻到完整 Issue Intelligence。另可「运行分类评估」查看 accuracy / F1 / per-category / reliability curve / needs_review 召回。
+
+评估区可在 **dev（调参集）/ test（留出集）** 之间切换：dev 是 prompt 调参所用的集合，指标已饱和，只作回归信号；泛化成绩只能来自 test。test 需要人工盲标后才存在（`data/eval/heldout/review_sheet.csv`，标完运行 `uv run python -m scripts.build_heldout --write`），未标注时该选项会显示为「待标注」占位而不是报错。
 
 ---
 
